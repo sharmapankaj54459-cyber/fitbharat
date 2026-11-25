@@ -1,773 +1,1155 @@
 <!doctype html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1B7F52">
+<title>FitBharat</title>
+<meta name="description" content="FitBharat: Indian food calorie tracker, desi home workouts and water log. Har Ghar Fit India.">
+<meta name="theme-color" content="#0E1411" id="metaTheme">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FitBharat">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px)}body{margin:0}[hidden]{display:none!important}</style>
-<title>FitBharat</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Hind:wght@400;500;600&display=swap">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-/* Layout: one phone-width column, four tabs (Today, Food, Workout, Profile) pinned to the bottom. Leaf green leads, turmeric marks progress and warnings. */
+/* FitBharat: dark base with saffron, India-green and chakra-blue rings. Plain CSS so it works offline with no CDN. */
 :root{
-  --bg:#F2F5F3; --surface:#FFFFFF; --fg:#14231B; --muted:#5B6B62; --line:#DCE4DF;
-  --accent:#1B7F52; --accent-fg:#FFFFFF; --warm:#C97A00; --danger:#C23B2E; --track:#E3EAE6;
-  --font-d:'Baloo 2','Hind',system-ui,sans-serif;
-  --font-b:'Hind','Inter',system-ui,sans-serif;
+  --bg:#FBF6EE; --card:#FFFFFF; --card2:#F5EDE0; --fg:#1B1713; --muted:#6B6258; --line:#E7DBC8; --track:#EFE5D5;
+  --accent:#FF9933; --on-accent:#1B1713; --acc-text:#B45309;
+  --pro:#1E9A5F; --carb:#D99A00; --fat:#2F6FDB; --danger:#C62828; --ok:#1E9A5F;
+  --shadow:0 1px 2px rgba(60,40,10,.06),0 8px 22px rgba(60,40,10,.07);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){
+@media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0F1814; --surface:#17241D; --fg:#E8F0EB; --muted:#93A69B; --line:#263629;
-    --accent:#3CC688; --accent-fg:#07140D; --warm:#F2A93B; --danger:#F0756A; --track:#243329;
+    --bg:#0E1411; --card:#161F1A; --card2:#1D2822; --fg:#F3EFE7; --muted:#9BA89F; --line:#26332B; --track:#243029;
+    --acc-text:#FFB366; --pro:#3DD68C; --carb:#F5C542; --fat:#5AA2FF; --danger:#FF6B6B; --ok:#3DD68C;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.28);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0F1814; --surface:#17241D; --fg:#E8F0EB; --muted:#93A69B; --line:#263629;
-  --accent:#3CC688; --accent-fg:#07140D; --warm:#F2A93B; --danger:#F0756A; --track:#243329;
+  --bg:#0E1411; --card:#161F1A; --card2:#1D2822; --fg:#F3EFE7; --muted:#9BA89F; --line:#26332B; --track:#243029;
+  --acc-text:#FFB366; --pro:#3DD68C; --carb:#F5C542; --fat:#5AA2FF; --danger:#FF6B6B; --ok:#3DD68C;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.28);
   color-scheme:dark;
 }
-*{box-sizing:border-box}
-body{
-  background:var(--bg); color:var(--fg); font-family:var(--font-b); font-size:16px; line-height:1.5;
-  padding-block:12px 100px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-}
-.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-h1,h2,h3{font-family:var(--font-d);margin:0;line-height:1.2;text-wrap:balance}
-h1{font-size:1.7rem}
-h2{font-size:1.15rem}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--font);-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+body.lock{overflow:hidden}
+h1,h2,h3,p{margin:0}
+h1{font-size:1.55rem;line-height:1.2;letter-spacing:-.01em}
+h2{font-size:1.1rem;line-height:1.25}
 h3{font-size:1rem}
-p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;width:100%;min-width:0}
+textarea{min-height:90px;resize:vertical}
+label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted);min-width:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .muted{color:var(--muted)}
 .small{font-size:.85rem}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-header .tag{max-width:30ch}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.btn{background:var(--accent);color:var(--accent-fg);border:0;border-radius:10px;padding:10px 16px;font:600 15px var(--font-b);min-height:44px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
-.btn.small{min-height:36px;padding:6px 12px;font-size:14px}
-.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%;min-width:0}
-label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.num{font-variant-numeric:tabular-nums}
+.hidden,[hidden]{display:none!important}
+
+/* shell */
+#app{max-width:560px;margin:0 auto;min-height:100vh;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:calc(86px + env(safe-area-inset-bottom,0px));
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+.screen{display:none;padding:16px;flex-direction:column;gap:14px}
+.screen.on{display:flex;animation:enter .28s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;min-width:0}
 .row{display:flex;align-items:center;gap:12px;min-width:0}
-.row .grow{flex:1;min-width:0}
-.tab{display:none;flex-direction:column;gap:14px}
-.tab.on{display:flex}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:0 max(8px,env(safe-area-inset-left,0px)) env(safe-area-inset-bottom,0px) max(8px,env(safe-area-inset-right,0px));z-index:5}
-nav button{flex:1;background:none;border:0;border-top:3px solid transparent;color:var(--muted);font:600 14px var(--font-b);padding:14px 4px 12px;cursor:pointer}
-nav button[aria-selected="true"]{color:var(--accent);border-top-color:var(--accent)}
-.langbtn{min-width:64px}
+.grow{flex:1;min-width:0}
+.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.btn{background:var(--accent);color:var(--on-accent);border:0;border-radius:14px;padding:12px 18px;font-weight:700;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.sm{min-height:38px;padding:6px 14px;font-size:.9rem;border-radius:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.ib{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;line-height:1;padding:0}
+.ib[disabled]{opacity:.35}
+.chip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:.82rem;color:var(--muted);background:var(--card)}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 14px;min-height:42px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
 
-/* Today */
-.ringbox{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.ring{width:140px;height:140px;flex:none;position:relative}
-.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.ring .num{font-family:var(--font-d);font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums}
-.stats{flex:1;min-width:160px;display:flex;flex-direction:column;gap:10px}
-.bar{display:flex;flex-direction:column;gap:3px}
-.bar .top{display:flex;justify-content:space-between;font-size:.85rem;font-variant-numeric:tabular-nums}
-.bar .track{height:8px;background:var(--track);border-radius:99px;overflow:hidden}
-.bar .fill{height:100%;background:var(--accent);border-radius:99px}
-.glasses{display:flex;gap:8px;flex-wrap:wrap}
-.glass{width:36px;height:44px;border-radius:6px 6px 10px 10px;border:2px solid var(--line);background:transparent;cursor:pointer;padding:0}
-.glass.on{background:var(--accent);border-color:var(--accent)}
-.entry{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
-.entry:first-of-type{border-top:0}
+/* splash */
+#splash{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(120% 80% at 50% 28%,#3a2308 0%,#17110a 38%,#0E1411 72%);color:#fff;transition:opacity .5s ease;padding:24px;text-align:center}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .logo{width:132px;height:132px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(255,153,51,0))}50%{transform:scale(1.08);filter:drop-shadow(0 0 24px rgba(255,153,51,.6))}}
+#splash h1{font-size:2.1rem;letter-spacing:.01em}
+#splash h1 b{color:#FF9933}
+#splash .tag{color:#d8cdbd;font-size:1.02rem;letter-spacing:.04em}
+.sp-bar{width:min(240px,62vw);height:5px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:10px}
+.sp-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FF9933,#FFC98A);animation:load 2s linear forwards}
+@keyframes load{to{width:100%}}
+
+/* bottom nav */
+nav#nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav#nav .in{display:flex;width:100%;max-width:560px}
+nav#nav button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;color:var(--muted);font-size:.74rem;font-weight:700;min-height:62px;position:relative}
+nav#nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav#nav button[aria-current="page"]{color:var(--acc-text)}
+nav#nav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 4px 4px;background:var(--accent)}
+
+/* install banner */
+.install{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#2a1a08,#14201a);color:#fff;border-radius:18px;padding:12px 14px;border:1px solid #4a3414}
+.install .t{flex:1;min-width:0}
+.install b{display:block}
+.install small{color:#d8cdbd}
+.install .x{background:none;border:0;color:#d8cdbd;font-size:1.4rem;width:36px;height:36px}
+
+/* home */
+.hello{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rings{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+.ringbox{position:relative;width:200px;height:200px;flex:none}
+.ringbox svg{width:100%;height:100%;display:block}
+.ringbox .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.ringbox .big{font-size:1.65rem;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.rg{transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1)}
+.legend{flex:1;min-width:170px;display:flex;flex-direction:column;gap:10px}
+.lg{display:flex;align-items:center;gap:10px}
+.lg i{width:12px;height:12px;border-radius:50%;flex:none}
+.lg .nm{flex:1;font-weight:600;font-size:.92rem}
+.lg .vl{font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.water-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.glasses{display:flex;gap:6px;flex-wrap:wrap}
+.glass{width:26px;height:34px}
+.glass path.o{fill:none;stroke:var(--line);stroke-width:2}
+.glass path.f{fill:var(--fat);opacity:0}
+.glass.on path.f{opacity:1}
+.glass.on path.o{stroke:var(--fat)}
+.bar{height:10px;border-radius:99px;background:var(--track);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--fat);transition:width .5s ease}
+.tip{border-left:4px solid var(--accent);padding-left:12px}
+.week{display:flex;align-items:flex-end;gap:8px;height:110px;position:relative;margin-top:6px}
+.week .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;height:100%}
+.week .b{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:var(--track);min-height:3px}
+.week .b.t{background:var(--accent)}
+.week .b.o{background:var(--danger)}
+.week .d{font-size:.72rem;color:var(--muted)}
+
+/* log */
+.datebar{display:flex;align-items:center;gap:10px}
+.datebar .lbl{flex:1;text-align:center;font-weight:700}
+.meal h2{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .entry .nm{flex:1;min-width:0;overflow-wrap:anywhere}
-.entry .kc{font-variant-numeric:tabular-nums;font-weight:600}
-.x{background:none;border:0;color:var(--muted);font-size:1.3rem;line-height:1;width:36px;height:36px;cursor:pointer;border-radius:8px}
-.week{display:flex;align-items:flex-end;gap:8px;height:96px}
-.week .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
-.week .b{width:100%;max-width:34px;background:var(--track);border-radius:6px 6px 2px 2px;min-height:3px}
-.week .b.today{background:var(--accent)}
-.week .b.over{background:var(--warm)}
-.week .d{font-size:.75rem;color:var(--muted)}
+.entry .kc{font-weight:700;font-variant-numeric:tabular-nums}
+.entry .x{background:none;border:0;color:var(--muted);font-size:1.4rem;width:40px;height:40px;border-radius:10px}
+.empty{color:var(--muted);font-size:.92rem}
 
-/* Food */
-.foodrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.foodrow:first-child{border-top:0}
-.picker{border:2px solid var(--accent)}
-.qty{display:flex;align-items:center;gap:10px}
-.qty button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:1.3rem;cursor:pointer}
-.qty output{min-width:3ch;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
-details summary{cursor:pointer;font-weight:600;min-height:32px}
+/* sheet */
+#sheet{position:fixed;inset:0;z-index:120;display:none}
+#sheet.open{display:block}
+#sheet .bk{position:absolute;inset:0;background:rgba(0,0,0,.55);animation:fade .2s ease both}
+#sheet .pn{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;max-height:92vh;background:var(--bg);border-radius:22px 22px 0 0;
+  display:flex;flex-direction:column;animation:up .26s cubic-bezier(.2,.8,.2,1) both;padding-bottom:env(safe-area-inset-bottom,0px)}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#sheet .hd{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
+#sheet .bd{padding:4px 16px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.frow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;min-height:56px}
+.frow:first-child{border-top:0}
+.frow .n{flex:1;min-width:0}
+.frow .s{font-size:.82rem;color:var(--muted)}
+.stepper{display:flex;gap:8px;align-items:center}
+.stepper input{text-align:center;font-weight:700;max-width:110px}
+.oil{display:flex;flex-direction:column;gap:6px}
+.oil input[type=range]{padding:0;min-height:32px;accent-color:var(--accent);border:0;background:transparent}
+.oil .lbs{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.oil .lbs span.on{color:var(--acc-text);font-weight:800}
+.prev{background:var(--card2);border-radius:16px;padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center}
+.prev b{display:block;font-size:1.15rem;font-variant-numeric:tabular-nums}
+.prev span{font-size:.74rem;color:var(--muted)}
+.msg{color:var(--danger);font-size:.85rem;min-height:1.1em}
 
-/* Workout */
-.plan .meta{display:flex;gap:8px;flex-wrap:wrap}
-.chip{font-size:.8rem;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--muted)}
-.exlist{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:2px;font-size:.92rem}
-.runner{text-align:center;align-items:center}
-.runner .phase{font-family:var(--font-d);font-size:1rem;letter-spacing:.06em;text-transform:uppercase}
-.runner .phase.work{color:var(--accent)}
-.runner .phase.rest{color:var(--warm)}
-.runner .big{font-family:var(--font-d);font-size:5rem;line-height:1;font-variant-numeric:tabular-nums}
-.runner .exn{font-family:var(--font-d);font-size:1.4rem}
-.runner .ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+/* workouts */
+.wk h2{margin-bottom:2px}
+.exl{margin:0;padding-left:1.15rem;font-size:.9rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+#runner{position:fixed;inset:0;z-index:130;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;
+  padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+#runner.open{display:flex}
+#runner .ph{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.95rem}
+#runner .ph.work{color:var(--acc-text)} #runner .ph.rest{color:var(--pro)} #runner .ph.ready{color:var(--fat)}
+#runner .tm{position:relative;width:240px;height:240px}
+#runner .tm svg{width:100%;height:100%}
+#runner .tm b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4.6rem;font-variant-numeric:tabular-nums}
+#runner .exn{font-size:1.5rem;font-weight:800;text-wrap:balance}
+#runner .tp{max-width:34ch;color:var(--muted)}
+#runner .pbar{width:min(320px,80vw)}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .kpis{display:flex;gap:12px}
 .kpi{flex:1;display:flex;flex-direction:column;gap:2px}
-.kpi b{font-family:var(--font-d);font-size:1.7rem;line-height:1;font-variant-numeric:tabular-nums}
-.result{border-left:4px solid var(--accent);padding-left:12px}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:9;max-width:90%}
-@media (prefers-reduced-motion:no-preference){.bar .fill,.ring circle.v{transition:all .4s ease}}
-</style>
+.kpi b{font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}
 
+/* profile */
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;flex:none}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{background:var(--card2);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.bmi{position:relative;height:14px;border-radius:99px;margin:22px 0 6px;background:linear-gradient(90deg,#5AA2FF 0%,#3DD68C 22%,#3DD68C 42%,#F5C542 60%,#FF9933 76%,#E5484D 100%)}
+.bmi i{position:absolute;top:-7px;width:6px;height:28px;border-radius:3px;background:var(--fg);box-shadow:0 0 0 2px var(--bg);transform:translateX(-3px)}
+.bmil{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
+.switch{position:relative;width:56px;height:32px;border-radius:99px;border:1px solid var(--line);background:var(--track);padding:0;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--fg);transition:transform .2s ease}
+.switch[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(24px);background:#1B1713}
+.hist{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left}
+.hist:first-of-type{border-top:0}
+details summary{cursor:pointer;font-weight:700;min-height:36px;display:flex;align-items:center}
+
+/* onboarding */
+#onb{position:fixed;inset:0;z-index:150;background:var(--bg);display:none;overflow-y:auto}
+#onb.open{display:block}
+#onb .w{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:16px;padding:20px 16px 24px;
+  padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.dots{display:flex;gap:8px}
+.dots i{height:6px;flex:1;border-radius:99px;background:var(--track)}
+.dots i.on{background:var(--accent)}
+.opt{display:flex;flex-direction:column;gap:2px;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:12px 14px;width:100%;min-height:58px}
+.opt b{font-size:1rem}
+.opt span{font-size:.85rem;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--card2);box-shadow:inset 0 0 0 1px var(--accent)}
+.opts{display:flex;flex-direction:column;gap:8px}
+.ob-step{display:none;flex-direction:column;gap:14px}
+.ob-step.on{display:flex;animation:enter .25s ease both}
+
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.9rem;z-index:400;max-width:90%;text-align:center}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #splash .logo{animation:none}
+}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>FitBharat</h1>
-      <p class="muted small tag" data-i="tag"></p>
-    </div>
-    <button class="btn ghost small langbtn" id="langBtn" type="button" aria-label="Language"></button>
-  </header>
 
-  <section class="tab on" id="tab-today">
-    <div class="card">
-      <div class="ringbox">
-        <div class="ring">
-          <svg viewBox="0 0 140 140" aria-hidden="true">
-            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--track)" stroke-width="12"></circle>
-            <circle class="v" id="ringV" cx="70" cy="70" r="60" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"></circle>
-          </svg>
-          <div class="mid"><div class="num" id="ringNum">0</div><div class="small muted" id="ringLbl"></div></div>
-        </div>
-        <div class="stats" id="macros"></div>
-      </div>
-      <p class="small muted" id="goalLine"></p>
-    </div>
-
-    <div class="card">
-      <div class="row"><h2 class="grow" data-i="water"></h2><span class="small muted" id="waterTxt"></span></div>
-      <div class="glasses" id="glasses"></div>
-    </div>
-
-    <div class="card" id="meals"></div>
-
-    <div class="card">
-      <h2 data-i="last7"></h2>
-      <div class="week" id="week"></div>
-    </div>
-  </section>
-
-  <section class="tab" id="tab-food">
-    <div class="card picker" id="picker" hidden></div>
-    <div class="card">
-      <input id="q" type="search" autocomplete="off">
-      <div id="foodList"></div>
-      <p class="small muted" data-i="approx"></p>
-    </div>
-    <div class="card" id="recentBox" hidden></div>
-    <details class="card" id="recipeBox">
-      <summary data-i="recipe"></summary>
-      <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
-        <label><span data-i="rname"></span><input id="rName" maxlength="60"></label>
-        <div class="grid2">
-          <label><span data-i="ing"></span><select id="rI"></select></label>
-          <label><span data-i="qty"></span><input id="rQ" type="number" min="0.5" max="20" step="0.5" value="1" inputmode="decimal"></label>
-        </div>
-        <button type="button" class="btn ghost" id="rAdd" data-i="addIng"></button>
-        <div id="rList"></div>
-        <label><span data-i="rserv"></span><input id="rServ" type="number" min="1" max="20" value="1" inputmode="numeric"></label>
-        <button type="button" class="btn" id="rSave" data-i="saveRecipe"></button>
-      </div>
-    </details>
-    <details class="card" id="customBox">
-      <summary data-i="custom"></summary>
-      <form id="customForm" class="grid2" style="margin-top:12px">
-        <label style="grid-column:1/-1"><span data-i="fname"></span><input id="cName" required maxlength="60"></label>
-        <label><span>kcal</span><input id="cK" type="number" min="0" max="3000" inputmode="numeric" required></label>
-        <label><span data-i="protein"></span> (g)<input id="cP" type="number" min="0" max="300" inputmode="decimal"></label>
-        <label><span data-i="carbs"></span> (g)<input id="cC" type="number" min="0" max="500" inputmode="decimal"></label>
-        <label><span data-i="fat"></span> (g)<input id="cF" type="number" min="0" max="300" inputmode="decimal"></label>
-        <label style="grid-column:1/-1"><span data-i="meal"></span><select id="cM"></select></label>
-        <button class="btn" type="submit" style="grid-column:1/-1" data-i="add"></button>
-      </form>
-    </details>
-  </section>
-
-  <section class="tab" id="tab-move">
-    <div class="card runner" id="runner" hidden></div>
-    <div class="card">
-      <div class="kpis">
-        <div class="kpi"><b id="streak">0</b><span class="small muted" data-i="streak"></span></div>
-        <div class="kpi"><b id="totalW">0</b><span class="small muted" data-i="totalw"></span></div>
-      </div>
-    </div>
-    <div id="plans" style="display:flex;flex-direction:column;gap:14px"></div>
-  </section>
-
-  <section class="tab" id="tab-me">
-    <form class="card" id="profForm">
-      <h2 data-i="aboutyou"></h2>
-      <div class="grid2">
-        <label><span data-i="age"></span><input id="pAge" type="number" min="12" max="90" inputmode="numeric" required></label>
-        <label><span data-i="sex"></span><select id="pSex"></select></label>
-        <label><span data-i="height"></span><input id="pH" type="number" min="120" max="220" inputmode="numeric" required></label>
-        <label><span data-i="weight"></span><input id="pW" type="number" min="30" max="200" inputmode="decimal" required></label>
-      </div>
-      <label><span data-i="activity"></span><select id="pAct"></select></label>
-      <label><span data-i="goaltype"></span><select id="pGoal"></select></label>
-      <button class="btn" type="submit" data-i="save"></button>
-      <div class="result" id="pResult" hidden></div>
-    </form>
-    <form class="card" id="wForm">
-      <h2 data-i="wtitle"></h2>
-      <div class="row">
-        <input id="wIn" type="number" min="30" max="250" step="0.1" inputmode="decimal" required aria-label="kg" style="flex:1">
-        <button class="btn" type="submit" data-i="logW"></button>
-      </div>
-      <div id="wChart"></div>
-    </form>
-    <div class="card">
-      <h2 data-i="backup"></h2>
-      <p class="small muted" data-i="bkHelp"></p>
-      <textarea id="bk" rows="4" aria-label="backup"></textarea>
-      <div class="row">
-        <button type="button" class="btn ghost" id="bkExp" data-i="exportB"></button>
-        <button type="button" class="btn ghost" id="bkImp" data-i="importB"></button>
-      </div>
-    </div>
-    <p class="small muted" data-i="disclaimer"></p>
-  </section>
+<!-- splash -->
+<div id="splash" role="status" aria-label="FitBharat loading">
+  <svg class="logo" viewBox="0 0 120 120" aria-hidden="true">
+    <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="10"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="#FF9933" stroke-width="10" stroke-linecap="round" stroke-dasharray="226 302" transform="rotate(-90 60 60)"/>
+    <circle cx="60" cy="60" r="48" fill="none" stroke="#3DD68C" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 302" stroke-dashoffset="-238" transform="rotate(-90 60 60)"/>
+    <rect x="44" y="36" width="10" height="48" rx="3" fill="#fff"/>
+    <rect x="44" y="36" width="32" height="10" rx="3" fill="#fff"/>
+    <rect x="44" y="56" width="24" height="9" rx="3" fill="#fff"/>
+  </svg>
+  <h1>Fit<b>Bharat</b></h1>
+  <p class="tag">Har Ghar Fit India</p>
+  <div class="sp-bar"><i></i></div>
 </div>
 
-<nav role="tablist">
-  <button type="button" role="tab" data-tab="today" aria-selected="true"></button>
-  <button type="button" role="tab" data-tab="food" aria-selected="false"></button>
-  <button type="button" role="tab" data-tab="move" aria-selected="false"></button>
-  <button type="button" role="tab" data-tab="me" aria-selected="false"></button>
-</nav>
-<div id="toast" class="toast" hidden></div>
+<div id="app">
+  <!-- HOME -->
+  <section class="screen" id="s-home" aria-label="Home"></section>
+  <!-- LOG -->
+  <section class="screen" id="s-log" aria-label="Log Food"></section>
+  <!-- WORKOUTS -->
+  <section class="screen" id="s-workouts" aria-label="Workouts"></section>
+  <!-- PROFILE -->
+  <section class="screen" id="s-profile" aria-label="Profile"></section>
+</div>
 
+<nav id="nav" aria-label="Main">
+  <div class="in">
+    <button type="button" data-act="tab" data-tab="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>Home</button>
+    <button type="button" data-act="tab" data-tab="log">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8a3 3 0 0 0 3 3v7"/><path d="M4.5 3v6"/><path d="M9.5 3v6"/><path d="M17 3c-2 1.5-3 4-3 7 0 2 1 3 3 3v8"/></svg>Log Food</button>
+    <button type="button" data-act="tab" data-tab="workouts">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11"/><path d="M17.5 6.5v11"/><path d="M3.5 9v6"/><path d="M20.5 9v6"/><path d="M6.5 12h11"/></svg>Workouts</button>
+    <button type="button" data-act="tab" data-tab="profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.7 3.9-5.6 7.5-5.6s6.7 1.9 7.5 5.6"/></svg>Profile</button>
+  </div>
+</nav>
+
+<!-- add food sheet -->
+<div id="sheet" role="dialog" aria-modal="true" aria-label="Add food">
+  <div class="bk" data-act="sheetClose"></div>
+  <div class="pn">
+    <div class="hd"><h2 class="grow" id="shTitle">Add food</h2><button type="button" class="ib" data-act="sheetClose" aria-label="Close">&times;</button></div>
+    <div class="bd" id="shBody"></div>
+  </div>
+</div>
+
+<!-- workout runner -->
+<div id="runner" role="dialog" aria-modal="true" aria-label="Workout timer"></div>
+
+<!-- onboarding / edit goals -->
+<div id="onb" role="dialog" aria-modal="true" aria-label="Setup">
+  <div class="w">
+    <div class="row between"><div class="dots" id="obDots" style="flex:1"><i></i><i></i><i></i></div><button type="button" class="ib" id="obCancel" data-act="obCancel" aria-label="Close" hidden style="margin-left:12px">&times;</button></div>
+
+    <div class="ob-step" id="ob1">
+      <div><p class="eyebrow">Step 1 of 3</p><h1 id="obTitle1">Namaste! Aap kaun ho?</h1><p class="muted">Apna naam aur basic details batao. Ye sirf aapke phone me rehta hai.</p></div>
+      <label>Naam<input id="obName" maxlength="30" autocomplete="given-name" placeholder="Aapka naam"></label>
+      <label>Age (years)<input id="obAge" type="number" min="14" max="90" inputmode="numeric" placeholder="e.g. 25"></label>
+      <div><p class="small muted" style="margin-bottom:6px">Gender</p>
+        <div class="seg" id="obGender">
+          <button type="button" data-act="obGender" data-v="male" aria-pressed="false">Male</button>
+          <button type="button" data-act="obGender" data-v="female" aria-pressed="false">Female</button>
+          <button type="button" data-act="obGender" data-v="other" aria-pressed="false">Other</button>
+        </div></div>
+      <p class="msg" id="obMsg1" role="alert"></p>
+      <button type="button" class="btn" data-act="obNext">Next</button>
+    </div>
+
+    <div class="ob-step" id="ob2">
+      <div><p class="eyebrow">Step 2 of 3</p><h1>Height aur weight</h1><p class="muted">Isse aapka BMI aur daily target nikalte hain.</p></div>
+      <div><p class="small muted" style="margin-bottom:6px">Height</p>
+        <div class="seg" id="obHU">
+          <button type="button" data-act="obHU" data-v="cm" aria-pressed="true">cm</button>
+          <button type="button" data-act="obHU" data-v="ft" aria-pressed="false">ft + in</button>
+        </div></div>
+      <div id="obHcm"><label>Height (cm)<input id="obH" type="number" min="120" max="220" inputmode="decimal" placeholder="e.g. 170"></label></div>
+      <div id="obHft" class="grid2" hidden>
+        <label>Feet<input id="obFt" type="number" min="3" max="7" inputmode="numeric" placeholder="5"></label>
+        <label>Inches<input id="obIn" type="number" min="0" max="11" inputmode="numeric" placeholder="7"></label>
+      </div>
+      <label>Current weight (kg)<input id="obW" type="number" min="30" max="250" step="0.1" inputmode="decimal" placeholder="e.g. 68"></label>
+      <p class="msg" id="obMsg2" role="alert"></p>
+      <div class="grid2"><button type="button" class="btn ghost" data-act="obBack">Back</button><button type="button" class="btn" data-act="obNext">Next</button></div>
+    </div>
+
+    <div class="ob-step" id="ob3">
+      <div><p class="eyebrow">Step 3 of 3</p><h1>Aapka goal kya hai?</h1><p class="muted">Activity aur goal ke hisaab se calories, protein, carbs, fat aur paani ka target banega.</p></div>
+      <div><p class="small muted" style="margin-bottom:6px">Activity level</p><div class="opts" id="obAct"></div></div>
+      <div><p class="small muted" style="margin-bottom:6px">Goal</p><div class="opts" id="obGoal"></div></div>
+      <p class="msg" id="obMsg3" role="alert"></p>
+      <div class="grid2"><button type="button" class="btn ghost" data-act="obBack">Back</button><button type="button" class="btn" data-act="obFinish" id="obFinish">Start FitBharat</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script>
+var FOODS=[{"n":"Roti","h":"रोटी","t":"P","l":"piece","c":1,"g":40,"k":100,"p":3,"cb":18,"f":2,"o":0},{"n":"Plain paratha","h":"सादा पराठा","t":"P","l":"piece","c":1,"g":70,"k":200,"p":4,"cb":28,"f":8,"o":4},{"n":"Aloo paratha","h":"आलू पराठा","t":"P","l":"piece","c":1,"g":110,"k":290,"p":6,"cb":40,"f":12,"o":6},{"n":"Rice, cooked","h":"चावल","t":"V","l":"katori","c":1,"g":150,"k":195,"p":4,"cb":42,"f":0.4,"o":0},{"n":"Dal","h":"दाल","t":"V","l":"katori","c":1,"g":150,"k":150,"p":9,"cb":22,"f":3,"o":2},{"n":"Rajma","h":"राजमा","t":"V","l":"katori","c":1,"g":150,"k":190,"p":10,"cb":28,"f":4,"o":2},{"n":"Chole","h":"छोले","t":"V","l":"katori","c":1,"g":150,"k":210,"p":9,"cb":28,"f":7,"o":4},{"n":"Paneer sabzi","h":"पनीर की सब्ज़ी","t":"V","l":"katori","c":1,"g":150,"k":280,"p":14,"cb":8,"f":22,"o":11},{"n":"Palak paneer","h":"पालक पनीर","t":"V","l":"katori","c":1,"g":150,"k":260,"p":12,"cb":9,"f":20,"o":10},{"n":"Aloo sabzi","h":"आलू की सब्ज़ी","t":"V","l":"katori","c":1,"g":150,"k":160,"p":3,"cb":24,"f":6,"o":3},{"n":"Mixed veg sabzi","h":"मिक्स सब्ज़ी","t":"V","l":"katori","c":1,"g":150,"k":120,"p":3,"cb":12,"f":7,"o":4},{"n":"Bhindi sabzi","h":"भिंडी","t":"V","l":"katori","c":1,"g":150,"k":110,"p":2,"cb":9,"f":8,"o":4},{"n":"Khichdi","h":"खिचड़ी","t":"V","l":"katori","c":1,"g":150,"k":170,"p":6,"cb":28,"f":3.5,"o":2},{"n":"Curd / dahi","h":"दही","t":"V","l":"katori","c":1,"g":150,"k":60,"p":3.5,"cb":4.7,"f":3.3,"o":0},{"n":"Chaas","h":"छाछ","t":"V","l":"glass","c":1,"g":250,"k":40,"p":2,"cb":3,"f":1.5,"o":0},{"n":"Idli","h":"इडली","t":"P","l":"piece","c":1,"g":40,"k":39,"p":2,"cb":8,"f":0.2,"o":0},{"n":"Plain dosa","h":"सादा डोसा","t":"P","l":"piece","c":1,"g":100,"k":135,"p":3,"cb":22,"f":4,"o":2},{"n":"Masala dosa","h":"मसाला डोसा","t":"P","l":"piece","c":1,"g":180,"k":250,"p":5,"cb":36,"f":10,"o":5},{"n":"Sambar","h":"सांभर","t":"V","l":"katori","c":1,"g":150,"k":90,"p":4,"cb":13,"f":2.5,"o":0},{"n":"Poha","h":"पोहा","t":"V","l":"plate","c":1,"g":250,"k":250,"p":5,"cb":40,"f":8,"o":4},{"n":"Upma","h":"उपमा","t":"V","l":"plate","c":1,"g":250,"k":230,"p":5,"cb":34,"f":8,"o":4},{"n":"Besan chilla","h":"बेसन चीला","t":"P","l":"piece","c":1,"g":80,"k":130,"p":6,"cb":15,"f":5,"o":3},{"n":"Boiled egg","h":"उबला अंडा","t":"P","l":"piece","c":1,"g":50,"k":78,"p":6,"cb":0.6,"f":5,"o":0},{"n":"Omelette","h":"ऑमलेट","t":"P","l":"egg","c":2,"g":120,"k":190,"p":12,"cb":1,"f":15,"o":8},{"n":"Chicken curry","h":"चिकन करी","t":"V","l":"katori","c":1,"g":150,"k":240,"p":22,"cb":6,"f":14,"o":7},{"n":"Fish curry","h":"मछली करी","t":"V","l":"katori","c":1,"g":150,"k":200,"p":20,"cb":5,"f":11,"o":6},{"n":"Chicken biryani","h":"चिकन बिरयानी","t":"V","l":"plate","c":1,"g":250,"k":420,"p":22,"cb":50,"f":14,"o":7},{"n":"Soya chunks sabzi","h":"सोया चंक्स","t":"V","l":"katori","c":1,"g":150,"k":180,"p":15,"cb":10,"f":8,"o":4},{"n":"Sprouts","h":"अंकुरित मूंग","t":"V","l":"katori","c":1,"g":150,"k":100,"p":8,"cb":17,"f":1,"o":0},{"n":"Roasted chana","h":"भुना चना","t":"G","l":"g","c":30,"g":30,"k":110,"p":6,"cb":18,"f":2,"o":0},{"n":"Peanuts, roasted","h":"मूंगफली भुनी","t":"G","l":"g","c":30,"g":30,"k":170,"p":7.5,"cb":5,"f":14,"o":0},{"n":"Almonds","h":"बादाम","t":"P","l":"piece","c":10,"g":12,"k":70,"p":2.5,"cb":2.5,"f":6,"o":0},{"n":"Milk, toned","h":"दूध टोंड","t":"V","l":"glass","c":1,"g":250,"k":116,"p":6,"cb":9.4,"f":6,"o":0},{"n":"Chai with milk and sugar","h":"चाय दूध चीनी वाली","t":"V","l":"cup","c":1,"g":150,"k":90,"p":2,"cb":12,"f":3,"o":0},{"n":"Sattu drink","h":"सत्तू शरबत","t":"V","l":"glass","c":1,"g":250,"k":150,"p":8,"cb":25,"f":2,"o":0},{"n":"Banana","h":"केला","t":"P","l":"piece","c":1,"g":120,"k":105,"p":1.3,"cb":27,"f":0.4,"o":0},{"n":"Apple","h":"सेब","t":"P","l":"piece","c":1,"g":150,"k":95,"p":0.5,"cb":25,"f":0.3,"o":0},{"n":"Samosa","h":"समोसा","t":"P","l":"piece","c":1,"g":80,"k":260,"p":4,"cb":24,"f":17,"o":9},{"n":"Pakora","h":"पकोड़े","t":"P","l":"piece","c":4,"g":100,"k":220,"p":5,"cb":18,"f":14,"o":7},{"n":"Pav bhaji","h":"पाव भाजी","t":"V","l":"plate","c":1,"g":250,"k":400,"p":8,"cb":55,"f":16,"o":8},{"n":"Vada pav","h":"वड़ा पाव","t":"P","l":"piece","c":1,"g":120,"k":290,"p":6,"cb":40,"f":12,"o":6},{"n":"Gulab jamun","h":"गुलाब जामुन","t":"P","l":"piece","c":1,"g":40,"k":150,"p":2,"cb":22,"f":6,"o":0},{"n":"Jalebi","h":"जलेबी","t":"G","l":"g","c":50,"g":50,"k":150,"p":1,"cb":28,"f":4,"o":0},{"n":"Medu vada","h":"मेदू वड़ा","t":"P","l":"piece","c":1,"g":45,"k":150,"p":5,"cb":15,"f":8,"o":4},{"n":"Uttapam","h":"उत्तपम","t":"P","l":"piece","c":1,"g":100,"k":190,"p":5,"cb":30,"f":5,"o":3},{"n":"Pesarattu","h":"पेसरट्टू","t":"P","l":"piece","c":1,"g":90,"k":120,"p":6,"cb":18,"f":3,"o":0},{"n":"Appam","h":"अप्पम","t":"P","l":"piece","c":1,"g":60,"k":120,"p":2,"cb":24,"f":1.5,"o":0},{"n":"Puttu","h":"पुट्टू","t":"V","l":"cup","c":1,"g":240,"k":180,"p":3,"cb":38,"f":2,"o":0},{"n":"Rava idli","h":"रवा इडली","t":"P","l":"piece","c":1,"g":45,"k":80,"p":2.5,"cb":13,"f":2,"o":0},{"n":"Lemon rice","h":"लेमन राइस","t":"V","l":"katori","c":1,"g":150,"k":220,"p":4,"cb":38,"f":6,"o":3},{"n":"Curd rice","h":"दही चावल","t":"V","l":"katori","c":1,"g":150,"k":190,"p":6,"cb":32,"f":4,"o":0},{"n":"Rasam","h":"रसम","t":"V","l":"katori","c":1,"g":150,"k":40,"p":1,"cb":7,"f":1,"o":0},{"n":"Coconut chutney","h":"नारियल चटनी","t":"S","l":"tbsp","c":2,"g":30,"k":50,"p":1,"cb":3,"f":4,"o":0},{"n":"Bisi bele bath","h":"बिसी बेले बाथ","t":"V","l":"katori","c":1,"g":150,"k":230,"p":7,"cb":36,"f":6,"o":3},{"n":"Sabudana khichdi","h":"साबूदाना खिचड़ी","t":"V","l":"plate","c":1,"g":250,"k":300,"p":3,"cb":50,"f":10,"o":5},{"n":"Thepla","h":"थेपला","t":"P","l":"piece","c":1,"g":45,"k":110,"p":3,"cb":15,"f":4,"o":2},{"n":"Dhokla","h":"ढोकला","t":"P","l":"piece","c":2,"g":60,"k":120,"p":4,"cb":20,"f":3,"o":0},{"n":"Misal pav","h":"मिसल पाव","t":"V","l":"plate","c":1,"g":250,"k":380,"p":13,"cb":52,"f":13,"o":7},{"n":"Bhel puri","h":"भेल पुरी","t":"V","l":"plate","c":1,"g":250,"k":250,"p":6,"cb":42,"f":7,"o":4},{"n":"Pani puri","h":"पानी पूरी","t":"P","l":"piece","c":6,"g":90,"k":180,"p":3,"cb":28,"f":6,"o":0},{"n":"Aloo tikki","h":"आलू टिक्की","t":"P","l":"piece","c":1,"g":70,"k":130,"p":2,"cb":18,"f":6,"o":3},{"n":"Chole bhature","h":"छोले भटूरे","t":"V","l":"plate","c":1,"g":250,"k":600,"p":16,"cb":70,"f":28,"o":14},{"n":"Kachori","h":"कचौरी","t":"P","l":"piece","c":1,"g":60,"k":230,"p":4,"cb":22,"f":14,"o":7},{"n":"Dal tadka","h":"दाल तड़का","t":"V","l":"katori","c":1,"g":150,"k":160,"p":8,"cb":20,"f":5,"o":3},{"n":"Dal makhani","h":"दाल मखनी","t":"V","l":"katori","c":1,"g":150,"k":220,"p":9,"cb":22,"f":11,"o":6},{"n":"Kadhi","h":"कढ़ी","t":"V","l":"katori","c":1,"g":150,"k":130,"p":4,"cb":12,"f":7,"o":4},{"n":"Baingan bharta","h":"बैंगन भरता","t":"V","l":"katori","c":1,"g":150,"k":120,"p":2,"cb":12,"f":7,"o":4},{"n":"Aloo gobi","h":"आलू गोभी","t":"V","l":"katori","c":1,"g":150,"k":150,"p":4,"cb":18,"f":7,"o":4},{"n":"Matar paneer","h":"मटर पनीर","t":"V","l":"katori","c":1,"g":150,"k":260,"p":12,"cb":14,"f":17,"o":9},{"n":"Paneer butter masala","h":"पनीर बटर मसाला","t":"V","l":"katori","c":1,"g":150,"k":320,"p":13,"cb":12,"f":25,"o":13},{"n":"Butter chicken","h":"बटर चिकन","t":"V","l":"katori","c":1,"g":150,"k":300,"p":22,"cb":8,"f":20,"o":10},{"n":"Egg curry","h":"अंडा करी","t":"V","l":"katori","c":1,"g":150,"k":220,"p":13,"cb":8,"f":15,"o":8},{"n":"Mutton curry","h":"मटन करी","t":"V","l":"katori","c":1,"g":150,"k":280,"p":22,"cb":5,"f":19,"o":10},{"n":"Tandoori chicken","h":"तंदूरी चिकन","t":"P","l":"piece","c":2,"g":200,"k":250,"p":30,"cb":4,"f":12,"o":6},{"n":"Chicken tikka","h":"चिकन टिक्का","t":"P","l":"piece","c":6,"g":150,"k":220,"p":28,"cb":4,"f":10,"o":5},{"n":"Veg biryani","h":"वेज बिरयानी","t":"V","l":"plate","c":1,"g":250,"k":350,"p":8,"cb":58,"f":10,"o":5},{"n":"Jeera rice","h":"जीरा राइस","t":"V","l":"katori","c":1,"g":150,"k":210,"p":4,"cb":40,"f":4,"o":2},{"n":"Veg pulao","h":"वेज पुलाव","t":"V","l":"katori","c":1,"g":150,"k":200,"p":4,"cb":36,"f":5,"o":3},{"n":"Naan","h":"नान","t":"P","l":"piece","c":1,"g":90,"k":260,"p":8,"cb":45,"f":5,"o":3},{"n":"Tandoori roti","h":"तंदूरी रोटी","t":"P","l":"piece","c":1,"g":50,"k":120,"p":4,"cb":22,"f":2,"o":0},{"n":"Missi roti","h":"मिस्सी रोटी","t":"P","l":"piece","c":1,"g":55,"k":150,"p":5,"cb":22,"f":5,"o":3},{"n":"Bajra roti","h":"बाजरे की रोटी","t":"P","l":"piece","c":1,"g":50,"k":120,"p":3,"cb":22,"f":2.5,"o":0},{"n":"Jowar roti","h":"ज्वार की रोटी","t":"P","l":"piece","c":1,"g":50,"k":100,"p":3,"cb":21,"f":1,"o":0},{"n":"Makki di roti","h":"मक्के की रोटी","t":"P","l":"piece","c":1,"g":50,"k":150,"p":3,"cb":28,"f":3,"o":0},{"n":"Puri","h":"पूरी","t":"P","l":"piece","c":1,"g":25,"k":100,"p":2,"cb":12,"f":5,"o":3},{"n":"Bhatura","h":"भटूरा","t":"P","l":"piece","c":1,"g":80,"k":250,"p":6,"cb":36,"f":10,"o":5},{"n":"Sarson ka saag","h":"सरसों का साग","t":"V","l":"katori","c":1,"g":150,"k":120,"p":5,"cb":10,"f":7,"o":4},{"n":"Dalia porridge","h":"दलिया","t":"V","l":"katori","c":1,"g":150,"k":150,"p":5,"cb":28,"f":2,"o":0},{"n":"Oats with milk","h":"ओट्स दूध के साथ","t":"V","l":"katori","c":1.3,"g":200,"k":200,"p":9,"cb":30,"f":5,"o":0},{"n":"Cornflakes with milk","h":"कॉर्नफ्लेक्स दूध के साथ","t":"V","l":"katori","c":1.3,"g":200,"k":220,"p":7,"cb":40,"f":3,"o":0},{"n":"Bread slice","h":"ब्रेड स्लाइस","t":"P","l":"piece","c":1,"g":30,"k":75,"p":2.5,"cb":14,"f":1,"o":0},{"n":"Bread with butter","h":"ब्रेड बटर","t":"P","l":"slice","c":1,"g":30,"k":110,"p":2.5,"cb":14,"f":5,"o":0},{"n":"Peanut butter","h":"पीनट बटर","t":"S","l":"tbsp","c":1,"g":15,"k":95,"p":4,"cb":3,"f":8,"o":0},{"n":"Veg sandwich","h":"वेज सैंडविच","t":"P","l":"piece","c":1,"g":150,"k":240,"p":7,"cb":32,"f":9,"o":0},{"n":"Maggi noodles","h":"मैगी","t":"P","l":"pack","c":1,"g":70,"k":310,"p":7,"cb":42,"f":13,"o":0},{"n":"Sweet corn","h":"स्वीट कॉर्न","t":"V","l":"cup","c":1,"g":240,"k":130,"p":5,"cb":29,"f":2,"o":0},{"n":"Mixed salad","h":"सलाद","t":"V","l":"katori","c":1.3,"g":200,"k":50,"p":2,"cb":10,"f":0.5,"o":0},{"n":"Cucumber","h":"खीरा","t":"P","l":"piece","c":1,"g":150,"k":30,"p":1,"cb":6,"f":0.2,"o":0},{"n":"Tomato soup","h":"टमाटर सूप","t":"V","l":"katori","c":1.3,"g":200,"k":90,"p":2,"cb":16,"f":2,"o":0},{"n":"Papad, roasted","h":"भुना पापड़","t":"P","l":"piece","c":1,"g":12,"k":40,"p":3,"cb":5,"f":0.5,"o":0},{"n":"Pickle","h":"अचार","t":"S","l":"tsp","c":1,"g":5,"k":15,"p":0,"cb":1,"f":1.5,"o":0},{"n":"Ghee","h":"घी","t":"S","l":"tsp","c":1,"g":5,"k":45,"p":0,"cb":0,"f":5,"o":0},{"n":"Butter","h":"मक्खन","t":"S","l":"tsp","c":1,"g":5,"k":35,"p":0,"cb":0,"f":4,"o":0},{"n":"Sugar","h":"चीनी","t":"S","l":"tsp","c":1,"g":5,"k":20,"p":0,"cb":5,"f":0,"o":0},{"n":"Jaggery","h":"गुड़","t":"G","l":"g","c":10,"g":10,"k":38,"p":0,"cb":9.5,"f":0,"o":0},{"n":"Honey","h":"शहद","t":"S","l":"tsp","c":1,"g":5,"k":21,"p":0,"cb":6,"f":0,"o":0},{"n":"Sweet lassi","h":"मीठी लस्सी","t":"V","l":"glass","c":1,"g":250,"k":180,"p":6,"cb":28,"f":5,"o":0},{"n":"Mango lassi","h":"आम की लस्सी","t":"V","l":"glass","c":1,"g":250,"k":230,"p":6,"cb":40,"f":5,"o":0},{"n":"Coffee with milk and sugar","h":"कॉफ़ी दूध चीनी वाली","t":"V","l":"cup","c":1,"g":150,"k":80,"p":2,"cb":11,"f":3,"o":0},{"n":"Masala chai, no sugar","h":"मसाला चाय बिना चीनी","t":"V","l":"cup","c":1,"g":150,"k":50,"p":2,"cb":5,"f":2.5,"o":1},{"n":"Coconut water","h":"नारियल पानी","t":"V","l":"glass","c":1,"g":250,"k":45,"p":0.5,"cb":11,"f":0,"o":0},{"n":"Sugarcane juice","h":"गन्ने का रस","t":"V","l":"glass","c":1,"g":250,"k":180,"p":0,"cb":45,"f":0,"o":0},{"n":"Orange juice","h":"संतरे का जूस","t":"V","l":"glass","c":1,"g":250,"k":110,"p":2,"cb":26,"f":0.5,"o":0},{"n":"Cold drink","h":"कोल्ड ड्रिंक","t":"P","l":"can","c":1,"g":330,"k":140,"p":0,"cb":35,"f":0,"o":0},{"n":"Orange","h":"संतरा","t":"P","l":"piece","c":1,"g":130,"k":62,"p":1.2,"cb":15,"f":0.2,"o":0},{"n":"Mango","h":"आम","t":"P","l":"piece","c":1,"g":250,"k":200,"p":2.8,"cb":50,"f":1.3,"o":0},{"n":"Guava","h":"अमरूद","t":"P","l":"piece","c":1,"g":100,"k":68,"p":2.6,"cb":14,"f":1,"o":0},{"n":"Papaya","h":"पपीता","t":"V","l":"katori","c":1.3,"g":200,"k":60,"p":0.9,"cb":15,"f":0.2,"o":0},{"n":"Watermelon","h":"तरबूज़","t":"V","l":"katori","c":1.3,"g":200,"k":50,"p":1,"cb":12,"f":0.2,"o":0},{"n":"Grapes","h":"अंगूर","t":"V","l":"cup","c":1,"g":240,"k":100,"p":1,"cb":26,"f":0.2,"o":0},{"n":"Pomegranate","h":"अनार","t":"V","l":"cup","c":1,"g":240,"k":130,"p":2.5,"cb":29,"f":2,"o":0},{"n":"Dates","h":"खजूर","t":"P","l":"piece","c":3,"g":24,"k":66,"p":0.5,"cb":18,"f":0,"o":0},{"n":"Cashews","h":"काजू","t":"P","l":"piece","c":10,"g":15,"k":90,"p":2.5,"cb":5,"f":7,"o":0},{"n":"Walnuts","h":"अखरोट","t":"P","l":"piece","c":5,"g":15,"k":90,"p":2,"cb":2,"f":9,"o":0},{"n":"Makhana, roasted","h":"भुना मखाना","t":"V","l":"cup","c":1,"g":240,"k":100,"p":3,"cb":20,"f":0.5,"o":0},{"n":"Khakra","h":"खाखरा","t":"P","l":"piece","c":1,"g":20,"k":70,"p":2,"cb":11,"f":2,"o":0},{"n":"Murukku","h":"मुरुक्कु","t":"G","l":"g","c":30,"g":30,"k":150,"p":2,"cb":15,"f":9,"o":0},{"n":"Bhujia namkeen","h":"भुजिया नमकीन","t":"G","l":"g","c":30,"g":30,"k":160,"p":4,"cb":15,"f":10,"o":0},{"n":"Biscuits","h":"बिस्कुट","t":"P","l":"piece","c":4,"g":40,"k":90,"p":1.5,"cb":15,"f":2.5,"o":0},{"n":"Potato chips","h":"आलू चिप्स","t":"G","l":"g","c":30,"g":30,"k":160,"p":2,"cb":15,"f":10,"o":0},{"n":"Ice cream","h":"आइसक्रीम","t":"P","l":"scoop","c":1,"g":50,"k":140,"p":2.5,"cb":17,"f":7,"o":0},{"n":"Kheer","h":"खीर","t":"V","l":"katori","c":1,"g":150,"k":220,"p":6,"cb":30,"f":8,"o":0},{"n":"Suji halwa","h":"सूजी का हलवा","t":"V","l":"katori","c":1,"g":150,"k":250,"p":3,"cb":35,"f":11,"o":6},{"n":"Gajar halwa","h":"गाजर का हलवा","t":"V","l":"katori","c":1,"g":150,"k":280,"p":5,"cb":34,"f":14,"o":7},{"n":"Rasgulla","h":"रसगुल्ला","t":"P","l":"piece","c":1,"g":50,"k":125,"p":3,"cb":25,"f":1.5,"o":0},{"n":"Besan laddu","h":"बेसन लड्डू","t":"P","l":"piece","c":1,"g":40,"k":190,"p":3,"cb":22,"f":10,"o":0},{"n":"Barfi","h":"बर्फ़ी","t":"P","l":"piece","c":1,"g":30,"k":150,"p":3,"cb":18,"f":8,"o":0},{"n":"Rasmalai","h":"रसमलाई","t":"P","l":"piece","c":1,"g":60,"k":190,"p":6,"cb":18,"f":10,"o":0},{"n":"Kulfi","h":"कुल्फ़ी","t":"P","l":"piece","c":1,"g":60,"k":190,"p":5,"cb":20,"f":10,"o":0},{"n":"Whey protein","h":"व्हे प्रोटीन","t":"P","l":"scoop","c":1,"g":30,"k":120,"p":24,"cb":3,"f":1.5,"o":0},{"n":"Egg white","h":"अंडे का सफ़ेद हिस्सा","t":"P","l":"piece","c":1,"g":33,"k":17,"p":3.6,"cb":0.2,"f":0.1,"o":0},{"n":"Fried egg","h":"फ्राई अंडा","t":"P","l":"piece","c":1,"g":46,"k":90,"p":6,"cb":0.4,"f":7,"o":4},{"n":"Grilled chicken breast","h":"ग्रिल्ड चिकन ब्रेस्ट","t":"G","l":"g","c":100,"g":100,"k":165,"p":31,"cb":0,"f":3.6,"o":0},{"n":"Tofu","h":"टोफू","t":"G","l":"g","c":100,"g":100,"k":76,"p":8,"cb":2,"f":4.8,"o":0},{"n":"Boiled chickpeas","h":"उबले चने","t":"V","l":"katori","c":1,"g":150,"k":180,"p":10,"cb":30,"f":3,"o":0},{"n":"Moong dal chilla","h":"मूंग दाल चीला","t":"P","l":"piece","c":1,"g":80,"k":110,"p":6,"cb":14,"f":3,"o":2},{"n":"Paneer, raw","h":"कच्चा पनीर","t":"G","l":"g","c":50,"g":50,"k":130,"p":9,"cb":1,"f":10,"o":5},{"n":"Fish fry","h":"फिश फ्राई","t":"P","l":"piece","c":1,"g":80,"k":180,"p":15,"cb":6,"f":10,"o":5},{"n":"Prawn curry","h":"झींगा करी","t":"V","l":"katori","c":1,"g":150,"k":210,"p":20,"cb":6,"f":12,"o":6},{"n":"Chicken 65","h":"चिकन 65","t":"P","l":"piece","c":6,"g":150,"k":300,"p":22,"cb":12,"f":18,"o":9},{"n":"Veg chowmein","h":"वेज चाउमीन","t":"V","l":"plate","c":1,"g":250,"k":350,"p":9,"cb":52,"f":12,"o":6},{"n":"Veg fried rice","h":"वेज फ्राइड राइस","t":"V","l":"plate","c":1,"g":250,"k":350,"p":7,"cb":55,"f":10,"o":5},{"n":"Veg momos, steamed","h":"वेज मोमोज़ भाप वाले","t":"P","l":"piece","c":5,"g":100,"k":190,"p":6,"cb":32,"f":4,"o":0},{"n":"Pizza slice","h":"पिज़्ज़ा स्लाइस","t":"P","l":"piece","c":1,"g":100,"k":270,"p":11,"cb":33,"f":10,"o":0},{"n":"Veg burger","h":"वेज बर्गर","t":"P","l":"piece","c":1,"g":150,"k":350,"p":10,"cb":45,"f":15,"o":0}];
+
+</script>
 <script>
 (function(){
 "use strict";
-var store={
-  get:function(k,d){try{var v=localStorage.getItem('fb_'+k);return v?JSON.parse(v):d}catch(e){return d}},
-  set:function(k,v){try{localStorage.setItem('fb_'+k,JSON.stringify(v))}catch(e){}}
-};
-var I18N={
- en:{tag:"Indian food calorie tracker and home workouts",today:"Today",food:"Food",move:"Workout",me:"Profile",
-  eaten:"eaten",left:"left",over:"over",goalLine:"Daily target",noProfile:"Using a default target. Set yours in Profile.",
-  protein:"Protein",carbs:"Carbs",fat:"Fat",water:"Water",glasses:"glasses",
-  breakfast:"Breakfast",lunch:"Lunch",snack:"Snacks",dinner:"Dinner",meal:"Meal",
-  empty:"Nothing logged yet. Open the Food tab and add your first meal.",last7:"Last 7 days",
-  search:"Search roti, dal, paneer...",add:"Add",custom:"Add your own food",fname:"Food name",
-  approx:"Values are approximate, per serving shown.",noFood:"No match. Use \"Add your own food\" below.",
-  added:"Added",removed:"Removed",qty:"Servings",
-  start:"Start",pause:"Pause",resume:"Resume",skip:"Skip",stop:"Stop",work:"Go",rest:"Rest",
-  finished:"Workout done. Well played.",streak:"day streak",totalw:"workouts done",
-  sec:"sec",exercises:"exercises",rounds:"min approx",
-  aboutyou:"About you",age:"Age",sex:"Sex",male:"Male",female:"Female",height:"Height (cm)",weight:"Weight (kg)",
-  activity:"Activity level",a1:"Mostly sitting",a2:"Light, walking or 1-3 workouts a week",a3:"Moderate, 3-5 workouts a week",a4:"Heavy, daily training or physical job",
-  goaltype:"Goal",g1:"Lose weight",g2:"Stay at this weight",g3:"Gain weight",save:"Save and calculate",
-  yourTarget:"Your daily target",waterNeed:"Water about",prot:"Protein about",
-  disclaimer:"FitBharat gives general guidance, not medical advice. Check with a doctor if you have a health condition. Your data stays on this device.",
-  saved:"Saved",
-  recent:"Recent",myrec:"My recipe",recipe:"Make a recipe",rname:"Recipe name",rserv:"Servings it makes",ing:"Ingredient",addIng:"Add ingredient",saveRecipe:"Save recipe",recipeSaved:"Recipe saved",noIng:"Add a name and at least one ingredient.",
-  wtitle:"Weight",logW:"Log weight",kg:"kg",wchange:"Change since first entry",wempty:"Log your weight to see the graph.",
-  backup:"Backup",exportB:"Export data",importB:"Import data",bkHelp:"Export, copy the text and keep it safe. Paste it here later and tap Import to restore.",imported:"Data restored",badData:"That text is not a valid backup.",copied:"Copied"},
- hi:{tag:"भारतीय खाने का कैलोरी ट्रैकर और घर पर वर्कआउट",today:"आज",food:"खाना",move:"वर्कआउट",me:"प्रोफ़ाइल",
-  eaten:"खाया",left:"बाकी",over:"ज़्यादा",goalLine:"रोज़ का लक्ष्य",noProfile:"अभी सामान्य लक्ष्य लगा है। प्रोफ़ाइल में अपना लक्ष्य बनाएं।",
-  protein:"प्रोटीन",carbs:"कार्ब्स",fat:"फैट",water:"पानी",glasses:"गिलास",
-  breakfast:"नाश्ता",lunch:"दोपहर का खाना",snack:"स्नैक्स",dinner:"रात का खाना",meal:"कब खाया",
-  empty:"अभी कुछ नहीं जोड़ा। खाना टैब खोलकर पहला खाना जोड़ें।",last7:"पिछले 7 दिन",
-  search:"रोटी, दाल, पनीर खोजें...",add:"जोड़ें",custom:"अपना खाना जोड़ें",fname:"खाने का नाम",
-  approx:"मान अनुमानित हैं, दिखाई गई मात्रा के हिसाब से।",noFood:"नहीं मिला। नीचे \"अपना खाना जोड़ें\" इस्तेमाल करें।",
-  added:"जुड़ गया",removed:"हट गया",qty:"मात्रा",
-  start:"शुरू करें",pause:"रुकें",resume:"चालू करें",skip:"आगे",stop:"बंद करें",work:"शुरू",rest:"आराम",
-  finished:"वर्कआउट पूरा। बहुत बढ़िया।",streak:"दिन की स्ट्रीक",totalw:"वर्कआउट पूरे",
-  sec:"सेकंड",exercises:"एक्सरसाइज़",rounds:"मिनट लगभग",
-  aboutyou:"आपके बारे में",age:"उम्र",sex:"लिंग",male:"पुरुष",female:"महिला",height:"कद (सेमी)",weight:"वज़न (किग्रा)",
-  activity:"कितने एक्टिव हैं",a1:"ज़्यादातर बैठे रहते हैं",a2:"हल्का, पैदल या हफ़्ते में 1-3 वर्कआउट",a3:"मध्यम, हफ़्ते में 3-5 वर्कआउट",a4:"ज़्यादा, रोज़ ट्रेनिंग या मेहनत का काम",
-  goaltype:"लक्ष्य",g1:"वज़न घटाना",g2:"वज़न वैसा ही रखना",g3:"वज़न बढ़ाना",save:"सेव करें और निकालें",
-  yourTarget:"आपका रोज़ का लक्ष्य",waterNeed:"पानी लगभग",prot:"प्रोटीन लगभग",
-  disclaimer:"FitBharat सामान्य जानकारी देता है, यह डॉक्टरी सलाह नहीं है। कोई बीमारी हो तो डॉक्टर से पूछें। आपका डेटा इसी फ़ोन में रहता है।",
-  saved:"सेव हो गया",
-  recent:"हाल का",myrec:"मेरी रेसिपी",recipe:"रेसिपी बनाएं",rname:"रेसिपी का नाम",rserv:"कितने सर्विंग बनते हैं",ing:"सामग्री",addIng:"सामग्री जोड़ें",saveRecipe:"रेसिपी सेव करें",recipeSaved:"रेसिपी सेव हुई",noIng:"नाम और कम से कम एक सामग्री डालें।",
-  wtitle:"वज़न",logW:"वज़न दर्ज करें",kg:"किग्रा",wchange:"पहली एंट्री से बदलाव",wempty:"ग्राफ़ देखने के लिए वज़न दर्ज करें।",
-  backup:"बैकअप",exportB:"डेटा निकालें",importB:"डेटा वापस लाएं",bkHelp:"डेटा निकालें, टेक्स्ट कॉपी करके संभालकर रखें। बाद में यहीं पेस्ट करके वापस लाएं पर टैप करें।",imported:"डेटा वापस आ गया",badData:"यह टेक्स्ट सही बैकअप नहीं है।",copied:"कॉपी हो गया"}
-};
-/* en, hi, kcal, protein, carbs, fat (per serving shown) */
-var FOODS=[
-["Roti (1 medium)","रोटी (1 मध्यम)",100,3,18,2],
-["Plain paratha (1)","सादा पराठा (1)",200,4,28,8],
-["Aloo paratha (1)","आलू पराठा (1)",290,6,40,12],
-["Rice, cooked (1 katori)","चावल (1 कटोरी)",195,4,42,0.4],
-["Dal (1 katori)","दाल (1 कटोरी)",150,9,22,3],
-["Rajma (1 katori)","राजमा (1 कटोरी)",190,10,28,4],
-["Chole (1 katori)","छोले (1 कटोरी)",210,9,28,7],
-["Paneer sabzi (1 katori)","पनीर की सब्ज़ी (1 कटोरी)",280,14,8,22],
-["Palak paneer (1 katori)","पालक पनीर (1 कटोरी)",260,12,9,20],
-["Aloo sabzi (1 katori)","आलू की सब्ज़ी (1 कटोरी)",160,3,24,6],
-["Mixed veg sabzi (1 katori)","मिक्स सब्ज़ी (1 कटोरी)",120,3,12,7],
-["Bhindi sabzi (1 katori)","भिंडी (1 कटोरी)",110,2,9,8],
-["Khichdi (1 katori)","खिचड़ी (1 कटोरी)",170,6,28,3.5],
-["Curd / dahi (1 katori)","दही (1 कटोरी)",60,3.5,4.7,3.3],
-["Chaas (1 glass)","छाछ (1 गिलास)",40,2,3,1.5],
-["Idli (1)","इडली (1)",39,2,8,0.2],
-["Plain dosa (1)","सादा डोसा (1)",135,3,22,4],
-["Masala dosa (1)","मसाला डोसा (1)",250,5,36,10],
-["Sambar (1 katori)","सांभर (1 कटोरी)",90,4,13,2.5],
-["Poha (1 plate)","पोहा (1 प्लेट)",250,5,40,8],
-["Upma (1 plate)","उपमा (1 प्लेट)",230,5,34,8],
-["Besan chilla (1)","बेसन चीला (1)",130,6,15,5],
-["Boiled egg (1)","उबला अंडा (1)",78,6,0.6,5],
-["Omelette (2 eggs)","ऑमलेट (2 अंडे)",190,12,1,15],
-["Chicken curry (1 katori)","चिकन करी (1 कटोरी)",240,22,6,14],
-["Fish curry (1 katori)","मछली करी (1 कटोरी)",200,20,5,11],
-["Chicken biryani (1 plate)","चिकन बिरयानी (1 प्लेट)",420,22,50,14],
-["Soya chunks sabzi (1 katori)","सोया चंक्स (1 कटोरी)",180,15,10,8],
-["Sprouts (1 katori)","अंकुरित मूंग (1 कटोरी)",100,8,17,1],
-["Roasted chana (30 g)","भुना चना (30 ग्राम)",110,6,18,2],
-["Peanuts, roasted (30 g)","मूंगफली भुनी (30 ग्राम)",170,7.5,5,14],
-["Almonds (10)","बादाम (10)",70,2.5,2.5,6],
-["Milk, toned (1 glass)","दूध टोंड (1 गिलास)",116,6,9.4,6],
-["Chai with milk and sugar (1 cup)","चाय दूध चीनी वाली (1 कप)",90,2,12,3],
-["Sattu drink (1 glass)","सत्तू शरबत (1 गिलास)",150,8,25,2],
-["Banana (1)","केला (1)",105,1.3,27,0.4],
-["Apple (1)","सेब (1)",95,0.5,25,0.3],
-["Samosa (1)","समोसा (1)",260,4,24,17],
-["Pakora (4 pieces)","पकोड़े (4 पीस)",220,5,18,14],
-["Pav bhaji (1 plate)","पाव भाजी (1 प्लेट)",400,8,55,16],
-["Vada pav (1)","वड़ा पाव (1)",290,6,40,12],
-["Gulab jamun (1)","गुलाब जामुन (1)",150,2,22,6],
-["Jalebi (50 g)","जलेबी (50 ग्राम)",150,1,28,4]
-];
-FOODS=FOODS.concat([
-["Medu vada (1)","मेदू वड़ा (1)",150,5,15,8],
-["Uttapam (1)","उत्तपम (1)",190,5,30,5],
-["Pesarattu (1)","पेसरट्टू (1)",120,6,18,3],
-["Appam (1)","अप्पम (1)",120,2,24,1.5],
-["Puttu (1 cup)","पुट्टू (1 कप)",180,3,38,2],
-["Rava idli (1)","रवा इडली (1)",80,2.5,13,2],
-["Lemon rice (1 katori)","लेमन राइस (1 कटोरी)",220,4,38,6],
-["Curd rice (1 katori)","दही चावल (1 कटोरी)",190,6,32,4],
-["Rasam (1 katori)","रसम (1 कटोरी)",40,1,7,1],
-["Coconut chutney (2 tbsp)","नारियल चटनी (2 चम्मच)",50,1,3,4],
-["Bisi bele bath (1 katori)","बिसी बेले बाथ (1 कटोरी)",230,7,36,6],
-["Sabudana khichdi (1 plate)","साबूदाना खिचड़ी (1 प्लेट)",300,3,50,10],
-["Thepla (1)","थेपला (1)",110,3,15,4],
-["Dhokla (2 pieces)","ढोकला (2 पीस)",120,4,20,3],
-["Misal pav (1 plate)","मिसल पाव (1 प्लेट)",380,13,52,13],
-["Bhel puri (1 plate)","भेल पुरी (1 प्लेट)",250,6,42,7],
-["Pani puri (6)","पानी पूरी (6)",180,3,28,6],
-["Aloo tikki (1)","आलू टिक्की (1)",130,2,18,6],
-["Chole bhature (1 plate)","छोले भटूरे (1 प्लेट)",600,16,70,28],
-["Kachori (1)","कचौरी (1)",230,4,22,14],
-["Dal tadka (1 katori)","दाल तड़का (1 कटोरी)",160,8,20,5],
-["Dal makhani (1 katori)","दाल मखनी (1 कटोरी)",220,9,22,11],
-["Kadhi (1 katori)","कढ़ी (1 कटोरी)",130,4,12,7],
-["Baingan bharta (1 katori)","बैंगन भरता (1 कटोरी)",120,2,12,7],
-["Aloo gobi (1 katori)","आलू गोभी (1 कटोरी)",150,4,18,7],
-["Matar paneer (1 katori)","मटर पनीर (1 कटोरी)",260,12,14,17],
-["Paneer butter masala (1 katori)","पनीर बटर मसाला (1 कटोरी)",320,13,12,25],
-["Butter chicken (1 katori)","बटर चिकन (1 कटोरी)",300,22,8,20],
-["Egg curry (1 katori)","अंडा करी (1 कटोरी)",220,13,8,15],
-["Mutton curry (1 katori)","मटन करी (1 कटोरी)",280,22,5,19],
-["Tandoori chicken (2 pieces)","तंदूरी चिकन (2 पीस)",250,30,4,12],
-["Chicken tikka (6 pieces)","चिकन टिक्का (6 पीस)",220,28,4,10],
-["Veg biryani (1 plate)","वेज बिरयानी (1 प्लेट)",350,8,58,10],
-["Jeera rice (1 katori)","जीरा राइस (1 कटोरी)",210,4,40,4],
-["Veg pulao (1 katori)","वेज पुलाव (1 कटोरी)",200,4,36,5],
-["Naan (1)","नान (1)",260,8,45,5],
-["Tandoori roti (1)","तंदूरी रोटी (1)",120,4,22,2],
-["Missi roti (1)","मिस्सी रोटी (1)",150,5,22,5],
-["Bajra roti (1)","बाजरे की रोटी (1)",120,3,22,2.5],
-["Jowar roti (1)","ज्वार की रोटी (1)",100,3,21,1],
-["Makki di roti (1)","मक्के की रोटी (1)",150,3,28,3],
-["Puri (1)","पूरी (1)",100,2,12,5],
-["Bhatura (1)","भटूरा (1)",250,6,36,10],
-["Sarson ka saag (1 katori)","सरसों का साग (1 कटोरी)",120,5,10,7],
-["Dalia porridge (1 katori)","दलिया (1 कटोरी)",150,5,28,2],
-["Oats with milk (1 bowl)","ओट्स दूध के साथ (1 कटोरा)",200,9,30,5],
-["Cornflakes with milk (1 bowl)","कॉर्नफ्लेक्स दूध के साथ (1 कटोरा)",220,7,40,3],
-["Bread slice (1)","ब्रेड स्लाइस (1)",75,2.5,14,1],
-["Bread with butter (1 slice)","ब्रेड बटर (1 स्लाइस)",110,2.5,14,5],
-["Peanut butter (1 tbsp)","पीनट बटर (1 चम्मच)",95,4,3,8],
-["Veg sandwich (1)","वेज सैंडविच (1)",240,7,32,9],
-["Maggi noodles (1 pack)","मैगी (1 पैकेट)",310,7,42,13],
-["Sweet corn (1 cup)","स्वीट कॉर्न (1 कप)",130,5,29,2],
-["Mixed salad (1 bowl)","सलाद (1 कटोरा)",50,2,10,0.5],
-["Cucumber (1 medium)","खीरा (1 मध्यम)",30,1,6,0.2],
-["Tomato soup (1 bowl)","टमाटर सूप (1 कटोरा)",90,2,16,2],
-["Papad, roasted (1)","भुना पापड़ (1)",40,3,5,0.5],
-["Pickle (1 tsp)","अचार (1 चम्मच)",15,0,1,1.5],
-["Ghee (1 tsp)","घी (1 चम्मच)",45,0,0,5],
-["Butter (1 tsp)","मक्खन (1 चम्मच)",35,0,0,4],
-["Sugar (1 tsp)","चीनी (1 चम्मच)",20,0,5,0],
-["Jaggery (10 g)","गुड़ (10 ग्राम)",38,0,9.5,0],
-["Honey (1 tsp)","शहद (1 चम्मच)",21,0,6,0],
-["Sweet lassi (1 glass)","मीठी लस्सी (1 गिलास)",180,6,28,5],
-["Mango lassi (1 glass)","आम की लस्सी (1 गिलास)",230,6,40,5],
-["Coffee with milk and sugar (1 cup)","कॉफ़ी दूध चीनी वाली (1 कप)",80,2,11,3],
-["Masala chai, no sugar (1 cup)","मसाला चाय बिना चीनी (1 कप)",50,2,5,2.5],
-["Coconut water (1 glass)","नारियल पानी (1 गिलास)",45,0.5,11,0],
-["Sugarcane juice (1 glass)","गन्ने का रस (1 गिलास)",180,0,45,0],
-["Orange juice (1 glass)","संतरे का जूस (1 गिलास)",110,2,26,0.5],
-["Cold drink (1 can)","कोल्ड ड्रिंक (1 कैन)",140,0,35,0],
-["Orange (1)","संतरा (1)",62,1.2,15,0.2],
-["Mango (1 medium)","आम (1 मध्यम)",200,2.8,50,1.3],
-["Guava (1)","अमरूद (1)",68,2.6,14,1],
-["Papaya (1 bowl)","पपीता (1 कटोरा)",60,0.9,15,0.2],
-["Watermelon (1 bowl)","तरबूज़ (1 कटोरा)",50,1,12,0.2],
-["Grapes (1 cup)","अंगूर (1 कप)",100,1,26,0.2],
-["Pomegranate (1 cup)","अनार (1 कप)",130,2.5,29,2],
-["Dates (3)","खजूर (3)",66,0.5,18,0],
-["Cashews (10)","काजू (10)",90,2.5,5,7],
-["Walnuts (5 halves)","अखरोट (5 टुकड़े)",90,2,2,9],
-["Makhana, roasted (1 cup)","भुना मखाना (1 कप)",100,3,20,0.5],
-["Khakra (1)","खाखरा (1)",70,2,11,2],
-["Murukku (30 g)","मुरुक्कु (30 ग्राम)",150,2,15,9],
-["Bhujia namkeen (30 g)","भुजिया नमकीन (30 ग्राम)",160,4,15,10],
-["Biscuits (4)","बिस्कुट (4)",90,1.5,15,2.5],
-["Potato chips (30 g)","आलू चिप्स (30 ग्राम)",160,2,15,10],
-["Ice cream (1 scoop)","आइसक्रीम (1 स्कूप)",140,2.5,17,7],
-["Kheer (1 katori)","खीर (1 कटोरी)",220,6,30,8],
-["Suji halwa (1 katori)","सूजी का हलवा (1 कटोरी)",250,3,35,11],
-["Gajar halwa (1 katori)","गाजर का हलवा (1 कटोरी)",280,5,34,14],
-["Rasgulla (1)","रसगुल्ला (1)",125,3,25,1.5],
-["Besan laddu (1)","बेसन लड्डू (1)",190,3,22,10],
-["Barfi (1 piece)","बर्फ़ी (1 पीस)",150,3,18,8],
-["Rasmalai (1 piece)","रसमलाई (1 पीस)",190,6,18,10],
-["Kulfi (1)","कुल्फ़ी (1)",190,5,20,10],
-["Whey protein (1 scoop)","व्हे प्रोटीन (1 स्कूप)",120,24,3,1.5],
-["Egg white (1)","अंडे का सफ़ेद हिस्सा (1)",17,3.6,0.2,0.1],
-["Fried egg (1)","फ्राई अंडा (1)",90,6,0.4,7],
-["Grilled chicken breast (100 g)","ग्रिल्ड चिकन ब्रेस्ट (100 ग्राम)",165,31,0,3.6],
-["Tofu (100 g)","टोफू (100 ग्राम)",76,8,2,4.8],
-["Boiled chickpeas (1 katori)","उबले चने (1 कटोरी)",180,10,30,3],
-["Moong dal chilla (1)","मूंग दाल चीला (1)",110,6,14,3],
-["Paneer, raw (50 g)","कच्चा पनीर (50 ग्राम)",130,9,1,10],
-["Fish fry (1 piece)","फिश फ्राई (1 पीस)",180,15,6,10],
-["Prawn curry (1 katori)","झींगा करी (1 कटोरी)",210,20,6,12],
-["Chicken 65 (6 pieces)","चिकन 65 (6 पीस)",300,22,12,18],
-["Veg chowmein (1 plate)","वेज चाउमीन (1 प्लेट)",350,9,52,12],
-["Veg fried rice (1 plate)","वेज फ्राइड राइस (1 प्लेट)",350,7,55,10],
-["Veg momos, steamed (5)","वेज मोमोज़ भाप वाले (5)",190,6,32,4],
-["Pizza slice (1)","पिज़्ज़ा स्लाइस (1)",270,11,33,10],
-["Veg burger (1)","वेज बर्गर (1)",350,10,45,15]
-]);
 
-var PLANS=[
- {id:"surya",en:"Surya Namaskar",hi:"सूर्य नमस्कार",work:25,rest:5,lvl:{en:"All levels, no equipment",hi:"सब के लिए, बिना सामान"},ex:[
-  ["Pranamasana (prayer pose)","प्रणामासन"],["Hasta Uttanasana (arms up)","हस्त उत्तानासन"],["Padahastasana (forward fold)","पादहस्तासन"],
-  ["Ashwa Sanchalanasana (lunge)","अश्व संचालनासन"],["Parvatasana (mountain)","पर्वतासन"],["Ashtanga Namaskara (eight limbs)","अष्टांग नमस्कार"],
-  ["Bhujangasana (cobra)","भुजंगासन"],["Parvatasana (mountain)","पर्वतासन"],["Ashwa Sanchalanasana (lunge)","अश्व संचालनासन"],
-  ["Padahastasana (forward fold)","पादहस्तासन"],["Hasta Uttanasana (arms up)","हस्त उत्तानासन"],["Pranamasana (prayer pose)","प्रणामासन"]]},
- {id:"begin",en:"Starter 10 minutes",hi:"शुरुआती 10 मिनट",work:40,rest:20,lvl:{en:"Beginner, no equipment",hi:"शुरुआत के लिए, बिना सामान"},ex:[
-  ["Jumping jacks","जंपिंग जैक्स"],["Bodyweight squats","बॉडीवेट स्क्वाट्स"],["Knee push-ups","घुटनों पर पुश-अप"],
-  ["Plank","प्लैंक"],["Glute bridge","ग्लूट ब्रिज"],["Mountain climbers","माउंटेन क्लाइंबर्स"],["March in place","जगह पर मार्च"]]},
- {id:"burn",en:"Fat burn 15 minutes",hi:"फैट बर्न 15 मिनट",work:40,rest:15,lvl:{en:"Intermediate, no equipment",hi:"मध्यम, बिना सामान"},ex:[
-  ["High knees","हाई नीज़"],["Reverse lunges","रिवर्स लंजेस"],["Push-ups","पुश-अप"],["Burpees","बर्पीज़"],
-  ["Bicycle crunches","बाइसिकल क्रंचेस"],["Jump squats","जंप स्क्वाट्स"],["Plank","प्लैंक"],["Skater hops","स्केटर हॉप्स"],["Side plank (each side)","साइड प्लैंक"]]}
-];
-var MEALS=["breakfast","lunch","snack","dinner"];
-
-var lang=store.get("lang","hi"),profile=store.get("profile",null),logs=store.get("logs",{}),water=store.get("water",{}),done=store.get("done",[]);
-var myfoods=store.get("myfoods",[]),weights=store.get("weights",[]),recipeIng=[],recentList=[];
-var tab="today",selFood=null,selCustom=null,selQty=1,run=null,timer=null,audio=null;
-function $(s){return document.querySelector(s)}
-function t(k){return (I18N[lang]&&I18N[lang][k])||I18N.en[k]||k}
+/* ---------- helpers ---------- */
+var mem={};
+var S={
+  get:function(k,d){try{var v=localStorage.getItem('fb2_'+k);return v==null?d:JSON.parse(v)}catch(e){return (k in mem)?mem[k]:d}},
+  set:function(k,v){mem[k]=v;try{localStorage.setItem('fb2_'+k,JSON.stringify(v))}catch(e){}}
+};
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-function dkey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function nm(f){return lang==="hi"?f[1]:f[0]}
-function r(n){return Math.round(n)}
-function target(){return profile&&profile.target?profile.target:2000}
-function protT(){return profile&&profile.prot?profile.prot:60}
-function waterT(){return profile&&profile.glasses?profile.glasses:8}
-function dayEntries(k){return logs[k]||[]}
-function sum(list,f){return list.reduce(function(a,e){return a+(e[f]||0)},0)}
-function toast(m){var el=$("#toast");el.textContent=m;el.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){el.hidden=true},1800)}
-function defMeal(){var h=new Date().getHours();return h<11?"breakfast":h<16?"lunch":h<19?"snack":"dinner"}
+function r0(n){return Math.round(n)}
+function r1(n){return Math.round(n*10)/10}
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function pad2(n){return n<10?'0'+n:''+n}
+function dkey(d){d=d||new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
+function parseKey(k){var a=k.split('-');return new Date(+a[0],+a[1]-1,+a[2])}
+function addDays(k,n){var d=parseKey(k);d.setDate(d.getDate()+n);return dkey(d)}
+function fmtDay(k){
+  var t=dkey();if(k===t)return 'Today';if(k===addDays(t,-1))return 'Yesterday';
+  return parseKey(k).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+}
+function qtxt(q){return String(+(+q).toFixed(2))}
+var toastT=null;
+function toast(m){var el=$('#toast');el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){el.hidden=true},2000)}
 
-function applyLang(){
-  document.documentElement.lang=lang==="hi"?"hi":"en";
-  document.querySelectorAll("[data-i]").forEach(function(el){el.textContent=t(el.getAttribute("data-i"))});
-  $("#langBtn").textContent=lang==="hi"?"English":"हिंदी";
-  var names={today:"today",food:"food",move:"move",me:"me"};
-  document.querySelectorAll("nav button").forEach(function(b){b.textContent=t(names[b.dataset.tab])});
-  $("#q").placeholder=t("search");
-  fillSelect($("#cM"),MEALS.map(function(m){return [m,t(m)]}),defMeal());
-  var sx=$("#pSex"),sv=sx.value||(profile&&profile.sex)||"m";
-  fillSelect(sx,[["m",t("male")],["f",t("female")]],sv);
-  var av=$("#pAct").value||(profile&&profile.act)||"1.375";
-  fillSelect($("#pAct"),[["1.2",t("a1")],["1.375",t("a2")],["1.55",t("a3")],["1.725",t("a4")]],av);
-  var gv=$("#pGoal").value||(profile&&profile.goal)||"keep";
-  fillSelect($("#pGoal"),[["lose",t("g1")],["keep",t("g2")],["gain",t("g3")]],gv);
-  renderAll();
-}
-function fillSelect(sel,opts,val){sel.innerHTML=opts.map(function(o){return '<option value="'+o[0]+'">'+esc(o[1])+'</option>'}).join("");if(val!=null)sel.value=val}
+/* ---------- constants ---------- */
+var OIL=[{label:'Zero Oil',m:0},{label:'Kam Tel',m:0.5},{label:'Normal',m:1},{label:'Zyada Ghee',m:1.75}];
+var MEALS=[{id:'breakfast',label:'Breakfast'},{id:'lunch',label:'Lunch'},{id:'snacks',label:'Evening Snacks'},{id:'dinner',label:'Dinner'}];
+var ACT=[
+  {v:1.2,t:'Mostly sitting',d:'Desk job, bahut kam chalna'},
+  {v:1.375,t:'Lightly active',d:'Walking ya hafte me 1-3 workout'},
+  {v:1.55,t:'Moderately active',d:'Hafte me 3-5 workout'},
+  {v:1.725,t:'Very active',d:'Roz training ya mehnat ka kaam'}
+];
+var GOALS=[
+  {v:'loss',t:'Weight Loss',d:'Fat kam karna'},
+  {v:'gain',t:'Muscle Gain',d:'Strength aur muscle badhana'},
+  {v:'fit',t:'Stay Fit',d:'Abhi jaisa weight, fit rehna'}
+];
+var GOAL_NAME={loss:'Weight Loss',gain:'Muscle Gain',fit:'Stay Fit'};
+var TIPS=[
+ 'Subah uthke ek glass paani zaroor piyo. Din ki achhi shuruaat hoti hai.',
+ 'Roti ke saath dal, dahi ya sabzi lo. Sirf roti-chawal se protein poora nahi hota.',
+ 'Chai me cheeni kam karo. Har chammach me lagbhag 20 kcal hoti hai.',
+ 'Khana khane ke baad 10 minute walk karo. Digestion ke liye achha hai.',
+ 'Samosa ki jagah kabhi-kabhi bhuna chana try karo. Calorie kam, protein zyada.',
+ 'Roz ek katori dahi ya chaas lo. Protein aur calcium dono milte hain.',
+ 'Raat ka khana sone se 2-3 ghante pehle kha lo.',
+ 'Pyaas aksar bhookh jaisi lagti hai. Pehle paani piyo, phir socho.',
+ 'Hafte me 3 din workout se shuru karo. Chhota shuru karo, regular raho.',
+ 'Mithai hafte me ek-do baar, chhota piece. Poori tarah mana karne ki zaroorat nahi.',
+ 'Surya Namaskar ke 12 steps poore body ko ek saath chalate hain.',
+ 'Plate me aadhi sabzi, chauthai dal ya protein, chauthai roti-chawal rakho.',
+ 'Ghee sahi matra me khao. Ek chammach roz kaafi hota hai.',
+ 'Neend poori lo. 7-8 ghante ki neend se bhookh control me rehti hai.',
+ 'Packet wale snacks ka label padho. Namak aur cheeni dhyan se dekho.',
+ 'Fruit ko juice ki jagah poora khao. Fibre milta hai aur pet bharta hai.',
+ 'Sprouts ya moong ka chilla subah ke liye protein wala option hai.',
+ 'Lift ki jagah seedhi chadho. Chhoti aadatein bade fark banati hain.',
+ 'Weekend par bhi khana log karo. Ek din chhodne se aadat toot jaati hai.',
+ 'Paneer, soya, dal, anda, chicken. Ye desi protein ke achhe options hain.'
+];
+var WORKOUTS=[
+ {id:'surya',name:'Surya Namaskar',hi:'सूर्य नमस्कार',lvl:'All levels',met:3.5,work:20,rest:3,rounds:2,about:'12 steps ka flow, har step ek saath saans ke saath.',ex:[
+  ['Pranamasana','Seedhe khade, haath jodkar chhati ke paas. Gehri saans lo.'],
+  ['Hasta Uttanasana','Haath upar, peeche ki taraf halka jhuko.'],
+  ['Padahastasana','Aage jhuko, haath pairo ke paas. Ghutne halke mod sakte ho.'],
+  ['Ashwa Sanchalanasana','Ek pair peeche, ghutna zameen ke paas, seena upar.'],
+  ['Parvatasana','Kamar upar, body ulte V jaisi. Eediyan neeche dabao.'],
+  ['Ashtanga Namaskara','Ghutne, seena aur thodi neeche, kamar upar.'],
+  ['Bhujangasana','Seena upar uthao, kandhe kaan se door, nazar aage.'],
+  ['Parvatasana','Wapas ulte V me. Saans dheere chhodo.'],
+  ['Ashwa Sanchalanasana','Doosra pair aage, seena upar.'],
+  ['Padahastasana','Aage jhuko, gardan dheeli.'],
+  ['Hasta Uttanasana','Haath upar, halka peeche jhuko.'],
+  ['Pranamasana','Wapas seedhe khade ho jao. Ek round poora.']
+ ]},
+ {id:'dand',name:'Dand-Baithak',hi:'दंड-बैठक',lvl:'Intermediate',met:6,work:30,rest:15,rounds:4,about:'Pehalwani exercise. Dand upper body, Baithak legs ke liye.',ex:[
+  ['Dand (Hindu push-up)','Pehle ulta V, phir seena zameen ke paas se aage sweep karo, upar uthao, wapas.'],
+  ['Baithak (Hindu squat)','Pair kandhe jitne chaude, eediyan upar, haath aage se peeche, gehri baithak.']
+ ]},
+ {id:'plank',name:'Plank',hi:'प्लैंक',lvl:'All levels',met:3.8,work:30,rest:15,rounds:3,about:'Core aur kamar ke liye. Seedhi line me body rakho.',ex:[
+  ['Forearm plank','Kohni kandhe ke neeche, body seedhi, pet andar.'],
+  ['Side plank (left)','Left kohni par, kamar upar, body seedhi line me.'],
+  ['Side plank (right)','Right kohni par, kamar upar, saans chalti rakho.'],
+  ['High plank','Haath seedhe, kandhe haath ke upar, pet tight.']
+ ]},
+ {id:'jj',name:'Jumping Jacks',hi:'जंपिंग जैक्स',lvl:'Beginner',met:8,work:40,rest:20,rounds:5,about:'Cardio jo poori body ko garam kar deta hai.',ex:[
+  ['Jumping jacks','Kood ke pair bahar, haath upar. Nichle ghutne halke mode rakho.'],
+  ['March in place','Jagah par ghutne upar karke chalo. Saans sambhalo.']
+ ]},
+ {id:'hiit',name:'Home HIIT',hi:'होम HIIT',lvl:'Intermediate',met:8,work:40,rest:20,rounds:2,about:'6 exercise, 2 round. Kam time me zyada mehnat.',ex:[
+  ['High knees','Jagah par daudo, ghutne kamar tak.'],
+  ['Squats','Pair kandhe jitne door, kamar peeche, ghutne pairo ke upar.'],
+  ['Push-ups','Seena zameen ke paas. Zyada mushkil ho to ghutno par karo.'],
+  ['Mountain climbers','Plank me, ghutne baari-baari seene ki taraf.'],
+  ['Reverse lunges','Ek pair peeche, dono ghutne 90 degree.'],
+  ['Burpees','Neeche, plank, upar kood. Dheere dheere karo.']
+ ]}
+];
 
-function renderAll(){renderToday();renderFood();renderMove();renderPicker();renderRecipe();renderWeight()}
+/* ---------- state ---------- */
+var profile=S.get('profile',null);
+var logs=S.get('logs',{});
+var water=S.get('water',{});
+var wlogs=S.get('workouts',{});
+var weights=S.get('weights',{});
+var recent=S.get('recent',[]);
+var today=dkey();
+var logDate=today;
+var tab='home';
+var deferred=null;
 
-/* ---------- Today ---------- */
-function renderToday(){
-  var k=dkey(),list=dayEntries(k),eaten=sum(list,"k"),tg=target();
-  var left=tg-eaten,pct=Math.min(1,eaten/tg);
-  var v=$("#ringV");v.style.strokeDashoffset=String(377*(1-pct));v.style.stroke=left<0?"var(--warm)":"var(--accent)";
-  $("#ringNum").textContent=Math.abs(r(left));
-  $("#ringLbl").textContent=left<0?t("over"):t("left");
-  $("#goalLine").textContent=t("goalLine")+": "+tg+" kcal  |  "+r(eaten)+" "+t("eaten")+(profile?"":"  |  "+t("noProfile"));
-  var P=sum(list,"p"),C=sum(list,"c"),F=sum(list,"f");
-  var cT=tg*0.5/4,fT=tg*0.25/9;
-  $("#macros").innerHTML=[[t("protein"),P,protT()],[t("carbs"),C,cT],[t("fat"),F,fT]].map(function(m){
-    var w=Math.min(100,m[1]/m[2]*100);
-    return '<div class="bar"><div class="top"><span>'+m[0]+'</span><span>'+r(m[1])+' / '+r(m[2])+' g</span></div><div class="track"><div class="fill" style="width:'+w+'%"></div></div></div>'}).join("");
-  var wn=water[k]||0,wt=waterT();
-  $("#waterTxt").textContent=wn+" / "+wt+" "+t("glasses");
-  var g="";for(var i=0;i<wt;i++){g+='<button type="button" class="glass'+(i<wn?" on":"")+'" data-g="'+i+'" aria-label="'+(i+1)+'"></button>'}
-  $("#glasses").innerHTML=g;
-  var m="";
-  if(!list.length){m='<p class="muted">'+t("empty")+'</p>'}
-  else{MEALS.forEach(function(ml){
-    var items=list.map(function(e,idx){return {e:e,idx:idx}}).filter(function(o){return o.e.m===ml});
-    if(!items.length)return;
-    m+='<div><div class="row"><h3 class="grow">'+t(ml)+'</h3><span class="small muted">'+r(sum(items.map(function(o){return o.e}),"k"))+' kcal</span></div>';
-    items.forEach(function(o){
-      var e=o.e,name=e.fid!=null?nm(FOODS[e.fid]):esc(e.name);
-      if(e.fid!=null)name=esc(name);
-      m+='<div class="entry"><span class="nm">'+name+(e.q!==1?' <span class="muted small">x'+e.q+'</span>':'')+'</span><span class="kc">'+r(e.k)+'</span><button type="button" class="x" data-del="'+o.idx+'" aria-label="'+t("removed")+'">&times;</button></div>'});
-    m+='</div>'});}
-  $("#meals").innerHTML=m;
-  var wk="",days=["","","","","","",""];
-  for(var d=6;d>=0;d--){
-    var dt=new Date();dt.setDate(dt.getDate()-d);var kk=dkey(dt);
-    var kc=sum(dayEntries(kk),"k"),h=Math.min(100,kc/tg*100);
-    var lab=dt.toLocaleDateString(lang==="hi"?"hi-IN":"en-IN",{weekday:"narrow"});
-    wk+='<div class="col" title="'+r(kc)+' kcal"><div class="b'+(d===0?" today":"")+(kc>tg?" over":"")+'" style="height:'+Math.max(3,h*0.7)+'%"></div><span class="d">'+lab+'</span></div>'}
-  $("#week").innerHTML=wk;
+function save(){S.set('profile',profile);S.set('logs',logs);S.set('water',water);S.set('workouts',wlogs);S.set('weights',weights);S.set('recent',recent)}
+
+/* ---------- calculators ---------- */
+function calcTargets(p){
+  var base=10*p.weight+6.25*p.height-5*p.age;
+  var bmr=p.gender==='male'?base+5:p.gender==='female'?base-161:base-78;
+  var tdee=bmr*p.activity;
+  var adj=p.goal==='loss'?-450:p.goal==='gain'?350:0;
+  var floor=p.gender==='male'?1500:p.gender==='female'?1200:1350;
+  var kcal=Math.max(floor,Math.round((tdee+adj)/10)*10);
+  var pk=p.goal==='loss'?1.6:p.goal==='gain'?1.8:1.3;
+  var protein=Math.round(p.weight*pk);
+  var fat=Math.round(kcal*0.25/9);
+  var carbs=Math.max(60,Math.round((kcal-protein*4-fat*9)/4));
+  var liters=clamp(Math.round(p.weight*0.035*4)/4,2,4.5);
+  return {kcal:kcal,protein:protein,carbs:carbs,fat:fat,water:liters};
+}
+function bmiOf(p){var m=p.height/100;return p.weight/(m*m)}
+function bmiCat(b){
+  if(b<18.5)return {t:'Underweight',h:'Kam wazan',c:'var(--fat)'};
+  if(b<23)return {t:'Normal',h:'Healthy range',c:'var(--ok)'};
+  if(b<25)return {t:'Overweight (at risk)',h:'Thoda zyada, dhyan do',c:'var(--carb)'};
+  if(b<30)return {t:'Obese I',h:'Motapa shuru',c:'var(--accent)'};
+  return {t:'Obese II',h:'Doctor se salah lo',c:'var(--danger)'};
 }
 
-/* ---------- Food ---------- */
-function renderFood(){
-  var q=$("#q").value.trim().toLowerCase(),html="",n=0;
-  renderRecent();
-  myfoods.forEach(function(f,i){
-    if(q&&f.name.toLowerCase().indexOf(q)<0)return;
-    n++;
-    html+='<div class="foodrow"><div style="flex:1;min-width:0"><div>'+esc(f.name)+' <span class="chip">'+t("myrec")+'</span></div><div class="small muted">'+r(f.k)+' kcal &middot; P '+r(f.p)+' &middot; C '+r(f.c)+' &middot; F '+r(f.f)+'</div></div><button type="button" class="x" data-delm="'+i+'" aria-label="x">&times;</button><button type="button" class="btn small" data-pickm="'+i+'">+ '+t("add")+'</button></div>'});
-  FOODS.forEach(function(f,i){
-    if(q&&f[0].toLowerCase().indexOf(q)<0&&f[1].indexOf(q)<0)return;
-    n++;
-    html+='<div class="foodrow"><div class="grow" style="flex:1;min-width:0"><div>'+esc(nm(f))+'</div><div class="small muted">'+f[2]+' kcal &middot; P '+f[3]+' &middot; C '+f[4]+' &middot; F '+f[5]+'</div></div><button type="button" class="btn small" data-pick="'+i+'">+ '+t("add")+'</button></div>'});
-  $("#foodList").innerHTML=n?html:'<p class="muted">'+t("noFood")+'</p>';
-}
-function renderPicker(){
-  var p=$("#picker");
-  if(selFood==null&&!selCustom){p.hidden=true;return}
-  var f=selCustom?[selCustom.name,selCustom.name,selCustom.k,selCustom.p,selCustom.c,selCustom.f]:FOODS[selFood];p.hidden=false;
-  p.innerHTML='<h2>'+esc(nm(f))+'</h2><div class="small muted">'+r(f[2]*selQty)+' kcal &middot; P '+r(f[3]*selQty)+' &middot; C '+r(f[4]*selQty)+' &middot; F '+r(f[5]*selQty)+'</div>'+
-   '<div class="row"><span class="muted small">'+t("qty")+'</span><div class="qty"><button type="button" id="qm" aria-label="-">&minus;</button><output>'+selQty+'</output><button type="button" id="qp" aria-label="+">+</button></div></div>'+
-   '<label><span>'+t("meal")+'</span><select id="pm"></select></label>'+
-   '<div class="row"><button type="button" class="btn grow" id="pOk" style="flex:1">'+t("add")+'</button><button type="button" class="btn ghost" id="pNo">&times;</button></div>';
-  fillSelect($("#pm"),MEALS.map(function(m){return [m,t(m)]}),renderPicker.meal||defMeal());
-}
-function addEntry(e){var k=dkey();if(!logs[k])logs[k]=[];logs[k].push(e);store.set("logs",logs)}
-
-/* ---------- Workout ---------- */
-function streakCount(){
-  var s=0,d=new Date();
-  if(done.indexOf(dkey(d))<0)d.setDate(d.getDate()-1);
-  while(done.indexOf(dkey(d))>=0){s++;d.setDate(d.getDate()-1)}
-  return s}
-function renderMove(){
-  $("#streak").textContent=streakCount();
-  $("#totalW").textContent=store.get("wcount",0);
-  $("#plans").innerHTML=PLANS.map(function(p){
-    var mins=Math.round(p.ex.length*(p.work+p.rest)/60);
-    return '<div class="card plan"><div class="row"><h2 class="grow" style="flex:1">'+esc(lang==="hi"?p.hi:p.en)+'</h2><button type="button" class="btn small" data-start="'+p.id+'">'+t("start")+'</button></div>'+
-     '<div class="meta"><span class="chip">'+esc(p.lvl[lang])+'</span><span class="chip">'+p.ex.length+' '+t("exercises")+'</span><span class="chip">'+p.work+' '+t("sec")+' / '+p.rest+' '+t("sec")+'</span><span class="chip">~'+mins+' '+t("rounds").split(" ")[0]+'</span></div>'+
-     '<ol class="exlist">'+p.ex.map(function(x){return '<li>'+esc(lang==="hi"?x[1]:x[0])+'</li>'}).join("")+'</ol></div>'}).join("");
-  renderRunner();
-}
-function beep(f,d){try{if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();var o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.value=0.08;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch(e){}}
-function renderRunner(){
-  var el=$("#runner");
-  if(!run){el.hidden=true;return}
-  el.hidden=false;
-  var p=run.plan,x=p.ex[run.i];
-  el.innerHTML='<div class="phase '+run.phase+'">'+t(run.phase)+' &middot; '+(run.i+1)+'/'+p.ex.length+'</div>'+
-   '<div class="big" id="rBig">'+run.left+'</div>'+
-   '<div class="exn">'+esc(lang==="hi"?x[1]:x[0])+'</div>'+
-   (run.phase==="rest"&&p.ex[run.i+1]?'<div class="small muted">&rarr; '+esc(lang==="hi"?p.ex[run.i+1][1]:p.ex[run.i+1][0])+'</div>':'')+
-   '<div class="ctl"><button type="button" class="btn" id="rPause">'+(run.paused?t("resume"):t("pause"))+'</button><button type="button" class="btn ghost" id="rSkip">'+t("skip")+'</button><button type="button" class="btn ghost" id="rStop">'+t("stop")+'</button></div>';
-}
-function startPlan(id){
-  var p=PLANS.filter(function(z){return z.id===id})[0];if(!p)return;
-  stopRun(true);
-  run={plan:p,i:0,phase:"work",left:p.work,paused:false};
-  beep(880,0.15);renderRunner();
-  $("#runner").scrollIntoView({behavior:"smooth",block:"start"});
-  timer=setInterval(tick,1000);
-}
-function stopRun(silent){clearInterval(timer);timer=null;run=null;if(!silent)renderRunner()}
-function advance(){
-  var p=run.plan;
-  if(run.phase==="work"){
-    if(run.i>=p.ex.length-1){finish();return}
-    if(p.rest>0){run.phase="rest";run.left=p.rest;beep(520,0.2);renderRunner();return}
+/* ---------- food model ---------- */
+function unitsFor(f){
+  var u=[];
+  if(f.t==='P')u.push({id:f.l,label:cap(f.l),g:f.g/f.c});
+  else if(f.t==='V'){
+    u.push({id:'katori',label:'Katori',g:150},{id:'plate',label:'Plate',g:250},{id:'cup',label:'Cup',g:/chai|coffee/i.test(f.n)?150:240});
+    if(f.l==='glass')u.unshift({id:'glass',label:'Glass',g:250});
   }
-  run.i=run.phase==="rest"?run.i+1:run.i+1;
-  run.phase="work";run.left=p.work;beep(880,0.2);renderRunner();
+  else if(f.t==='S')u.push({id:'tsp',label:'Tsp',g:5},{id:'tbsp',label:'Tbsp',g:15});
+  u.push({id:'g',label:'Grams',g:1});
+  var base=f.l;
+  u.sort(function(a,b){return (a.id===base?0:1)-(b.id===base?0:1)});
+  return u;
 }
-function tick(){
-  if(!run||run.paused)return;
-  run.left--;
-  if(run.left<=0){advance();return}
-  if(run.left<=3)beep(660,0.08);
-  var b=$("#rBig");if(b)b.textContent=run.left;
+function calcEntry(f,grams,oilIdx){
+  var m=grams/f.g,lv=OIL[oilIdx].m;
+  var dOil=f.o>0?(lv-1)*f.o*m:0;
+  return {k:Math.max(0,f.k*m+dOil*9),p:f.p*m,c:f.cb*m,f:Math.max(0,f.f*m+dOil)};
 }
-function finish(){
-  stopRun(true);beep(988,0.4);
-  var k=dkey();if(done.indexOf(k)<0){done.push(k);store.set("done",done)}
-  store.set("wcount",store.get("wcount",0)+1);
-  toast(t("finished"));renderMove();
+function baseText(f){
+  if(f.t==='G')return f.g+' g';
+  if(f.t==='P'||f.t==='S')return qtxt(f.c)+' '+f.l;
+  return Number.isInteger(f.c)?(f.c+' '+f.l):('~'+f.g+' g');
+}
+function defMeal(){var h=new Date().getHours();return h<11?'breakfast':h<16?'lunch':h<19?'snacks':'dinner'}
+function dayList(k){return logs[k]||[]}
+function sumDay(k){
+  var a=dayList(k),t={k:0,p:0,c:0,f:0};
+  a.forEach(function(e){t.k+=e.k;t.p+=e.p;t.c+=e.c;t.f+=e.f});
+  return t;
+}
+function waterMl(k){return water[k]||0}
+function dayWorkoutMin(k){return (wlogs[k]||[]).reduce(function(a,w){return a+w.min},0)}
+
+/* ---------- navigation ---------- */
+function setTab(t){
+  if(['home','log','workouts','profile'].indexOf(t)<0)t='home';
+  tab=t;
+  $$('.screen').forEach(function(s){s.classList.toggle('on',s.id==='s-'+t)});
+  $$('#nav button').forEach(function(b){if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  window.scrollTo(0,0);
+  render(t);
+}
+function render(t){
+  t=t||tab;
+  if(t==='home')renderHome();
+  else if(t==='log')renderLog();
+  else if(t==='workouts')renderWorkouts();
+  else if(t==='profile')renderProfile();
+}
+function renderAll(){render(tab)}
+
+/* overlay + Android back button support */
+var ov=null;
+function ovOpen(name,closeFn){ov={name:name,close:closeFn};try{history.pushState({ov:name},'')}catch(e){}}
+function ovClose(){
+  if(!ov)return;var o=ov;ov=null;o.close();
+  try{if(history.state&&history.state.ov)history.back()}catch(e){}
+}
+window.addEventListener('popstate',function(){if(ov){var o=ov;ov=null;o.close()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov)ovClose()});
+
+/* ---------- rings ---------- */
+function ringsSvg(items){
+  var w=11,gap=3,h='';
+  items.forEach(function(v,i){
+    var rad=92-i*(w+gap),circ=2*Math.PI*rad,p=clamp(v.pct,0,1);
+    h+='<circle cx="100" cy="100" r="'+rad+'" fill="none" stroke="var(--track)" stroke-width="'+w+'"/>';
+    h+='<circle class="rg" cx="100" cy="100" r="'+rad+'" fill="none" stroke="'+v.color+'" stroke-width="'+w+'" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+circ.toFixed(1)+'" data-off="'+(circ*(1-p)).toFixed(1)+'" transform="rotate(-90 100 100)"/>';
+  });
+  return '<svg viewBox="0 0 200 200" aria-hidden="true">'+h+'</svg>';
+}
+function animateRings(root){
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    $$('.rg',root).forEach(function(c){c.style.strokeDashoffset=c.getAttribute('data-off')});
+  })});
 }
 
-/* ---------- Profile ---------- */
-function loadProfile(){
-  if(!profile)return;
-  $("#pAge").value=profile.age;$("#pH").value=profile.h;$("#pW").value=profile.w;
-  showResult();
+/* ---------- install banner ---------- */
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+function installHtml(){
+  if(isStandalone())return '';
+  var until=S.get('installHide',0);
+  if(Date.now()<until)return '';
+  if(deferred){
+    return '<div class="install"><div class="t"><b>Install FitBharat App</b><small>Home screen par icon, bina browser bar ke, offline bhi.</small></div><button type="button" class="btn sm" data-act="install">Install</button><button type="button" class="x" data-act="installHide" aria-label="Dismiss">&times;</button></div>';
+  }
+  if(isIOS()){
+    return '<div class="install"><div class="t"><b>Install FitBharat App</b><small>Safari me Share dabao, phir &quot;Add to Home Screen&quot;.</small></div><button type="button" class="x" data-act="installHide" aria-label="Dismiss">&times;</button></div>';
+  }
+  return '';
 }
-function showResult(){
-  var el=$("#pResult");if(!profile){el.hidden=true;return}
-  el.hidden=false;
-  el.innerHTML='<h3>'+t("yourTarget")+'</h3><p><b style="font-family:var(--font-d);font-size:1.6rem">'+profile.target+'</b> kcal</p><p class="small muted">'+t("prot")+' '+profile.prot+' g &middot; '+t("waterNeed")+' '+profile.glasses+' '+t("glasses")+'</p>';
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;if(tab==='home'||tab==='profile')renderAll()});
+window.addEventListener('appinstalled',function(){deferred=null;toast('FitBharat install ho gaya');renderAll()});
+function doInstall(){
+  if(!deferred)return;
+  deferred.prompt();
+  deferred.userChoice.then(function(c){deferred=null;if(c&&c.outcome==='accepted')toast('Install ho raha hai...');renderAll()}).catch(function(){deferred=null;renderAll()});
 }
 
-/* ---------- Recent, recipes, weight, backup ---------- */
-function renderRecent(){
-  var seen={},out=[],ks=Object.keys(logs).sort().reverse();
-  for(var a=0;a<ks.length&&out.length<8;a++){
-    var L=logs[ks[a]];
-    for(var j=L.length-1;j>=0&&out.length<8;j--){
-      var e=L[j],key=e.fid!=null?"f"+e.fid:"n"+e.name;
-      if(seen[key])continue;seen[key]=1;
-      var q=e.q||1;
-      out.push({name:e.fid!=null?nm(FOODS[e.fid]):e.name,k:e.k/q,p:e.p/q,c:e.c/q,f:e.f/q});
+/* ---------- HOME ---------- */
+function renderHome(){
+  var el=$('#s-home');
+  if(!profile){el.innerHTML='';return}
+  var T=profile.t,d=sumDay(today),ml=waterMl(today),wl=T.water*1000;
+  var left=T.kcal-d.k,over=left<0;
+  var tipIdx=Math.floor((parseKey(today)-new Date(parseKey(today).getFullYear(),0,0))/864e5)%TIPS.length;
+  var hr=new Date().getHours(),gr=hr<12?'Suprabhat':hr<17?'Namaste':'Shubh sandhya';
+  var cups=Math.ceil(wl/250),gl='';
+  var on=Math.floor(ml/250);
+  for(var i=0;i<cups;i++){
+    gl+='<svg class="glass'+(i<on?' on':'')+'" viewBox="0 0 26 34" aria-hidden="true"><path class="f" d="M4 6h18l-2 24a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path class="o" d="M3 3h20l-2.2 27a3 3 0 0 1-3 3H8.2a3 3 0 0 1-3-3z"/></svg>';
+  }
+  var wmin=dayWorkoutMin(today);
+  var wk='';
+  var maxv=T.kcal*1.3;
+  for(var j=6;j>=0;j--){
+    var k=addDays(today,-j),kc=sumDay(k).k,hgt=clamp(kc/maxv*100,3,100);
+    var lab=parseKey(k).toLocaleDateString('en-IN',{weekday:'narrow'});
+    wk+='<div class="col" title="'+r0(kc)+' kcal"><div class="b'+(j===0?' t':'')+(kc>T.kcal?' o':'')+'" style="height:'+hgt+'%"></div><span class="d">'+lab+'</span></div>';
+  }
+  el.innerHTML=
+   installHtml()+
+   '<div class="hello"><div><p class="eyebrow">'+esc(fmtDay(today))+'</p><h1>'+gr+', '+esc(profile.name)+'</h1></div></div>'+
+   '<div class="card"><div class="rings">'+
+     '<div class="ringbox">'+ringsSvg([
+        {pct:d.k/T.kcal,color:over?'var(--danger)':'var(--accent)'},
+        {pct:d.p/T.protein,color:'var(--pro)'},
+        {pct:d.c/T.carbs,color:'var(--carb)'},
+        {pct:d.f/T.fat,color:'var(--fat)'}])+
+       '<div class="mid"><div class="big">'+Math.abs(r0(left))+'</div><div class="small muted">kcal '+(over?'over':'left')+'</div></div></div>'+
+     '<div class="legend">'+
+       lg('var(--accent)','Calories',r0(d.k)+' / '+T.kcal+' kcal')+
+       lg('var(--pro)','Protein',r0(d.p)+' / '+T.protein+' g')+
+       lg('var(--carb)','Carbs',r0(d.c)+' / '+T.carbs+' g')+
+       lg('var(--fat)','Fat',r0(d.f)+' / '+T.fat+' g')+
+     '</div></div>'+
+     '<button type="button" class="btn" data-act="goLog">+ Khana add karo</button></div>'+
+   '<div class="card"><div class="row between"><h2>Water</h2><span class="num muted">'+r1(ml/1000)+' / '+T.water+' L</span></div>'+
+     '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+wl+'" aria-valuenow="'+ml+'"><i style="width:'+clamp(ml/wl*100,0,100)+'%"></i></div>'+
+     '<div class="glasses">'+gl+'</div>'+
+     '<div class="water-row"><button type="button" class="btn grow" data-act="water" data-d="250">+ 250 ml</button><button type="button" class="ib" data-act="water" data-d="-250" aria-label="Undo 250 ml"'+(ml<=0?' disabled':'')+'>&minus;</button></div></div>'+
+   '<div class="card tip"><p class="eyebrow">Aaj ki tip</p><p>'+esc(TIPS[tipIdx])+'</p></div>'+
+   '<div class="card"><div class="row between"><div><h2>Aaj ka workout</h2><p class="muted small">'+(wmin?wmin+' min ho gaye':'Abhi shuru nahi kiya')+'</p></div><button type="button" class="btn sm" data-act="tab" data-tab="workouts">'+(wmin?'Aur karo':'Shuru karo')+'</button></div></div>'+
+   '<div class="card"><h2>Last 7 days</h2><div class="week">'+wk+'</div><p class="small muted">Saffron bar aaj ka hai. Laal bar matlab target se zyada.</p></div>';
+  animateRings(el);
+}
+function lg(c,n,v){return '<div class="lg"><i style="background:'+c+'"></i><span class="nm">'+n+'</span><span class="vl">'+v+'</span></div>'}
+
+/* ---------- LOG ---------- */
+function renderLog(){
+  var el=$('#s-log');
+  if(!profile){el.innerHTML='';return}
+  var T=profile.t,d=sumDay(logDate),list=dayList(logDate);
+  var h='<div class="datebar"><button type="button" class="ib" data-act="dayPrev" aria-label="Previous day">&lsaquo;</button><div class="lbl">'+esc(fmtDay(logDate))+'</div><button type="button" class="ib" data-act="dayNext" aria-label="Next day"'+(logDate>=today?' disabled':'')+'>&rsaquo;</button></div>';
+  h+='<div class="card"><div class="row between"><div><p class="eyebrow">Total</p><p class="num" style="font-size:1.5rem;font-weight:800">'+r0(d.k)+' <span class="muted" style="font-size:.95rem;font-weight:600">/ '+T.kcal+' kcal</span></p></div><div class="small muted num" style="text-align:right">P '+r0(d.p)+' g<br>C '+r0(d.c)+' g &middot; F '+r0(d.f)+' g</div></div></div>';
+  MEALS.forEach(function(m){
+    var items=[];
+    list.forEach(function(e,i){if(e.meal===m.id)items.push({e:e,i:i})});
+    var mk=items.reduce(function(a,o){return a+o.e.k},0);
+    h+='<div class="card meal"><h2><span>'+m.label+'</span><span class="muted num" style="font-weight:600;font-size:.95rem">'+r0(mk)+' kcal</span></h2>';
+    if(!items.length)h+='<p class="empty">Kuch add nahi kiya.</p>';
+    items.forEach(function(o){
+      var e=o.e;
+      h+='<div class="entry"><div class="nm"><div>'+esc(e.nm)+'</div><div class="small muted">'+esc(e.qt)+(e.og?' &middot; '+esc(e.og):'')+'</div></div><span class="kc">'+r0(e.k)+'</span><button type="button" class="x" data-act="delEntry" data-i="'+o.i+'" aria-label="Remove '+esc(e.nm)+'">&times;</button></div>';
+    });
+    h+='<button type="button" class="btn ghost sm" data-act="addFood" data-meal="'+m.id+'">+ Add to '+m.label+'</button></div>';
+  });
+  el.innerHTML=h;
+}
+
+/* ---------- add food sheet ---------- */
+var sel=null; // {f, unit, qty, oil, meal}
+var shView='search';
+function openSheet(meal,view){
+  sel={f:null,uid:null,qty:1,oil:2,meal:meal||defMeal()};
+  $('#sheet').classList.add('open');document.body.classList.add('lock');
+  ovOpen('sheet',function(){$('#sheet').classList.remove('open');document.body.classList.remove('lock')});
+  showSheet(view||'search');
+}
+function closeSheet(){ovClose()}
+function showSheet(v){
+  shView=v;
+  var b=$('#shBody'),t=$('#shTitle');
+  if(v==='search'){
+    t.textContent='Khana chuno';
+    var rc='';
+    recent.forEach(function(n,i){rc+='<button type="button" class="chip" data-act="pickRecent" data-n="'+esc(n)+'">'+esc(n)+'</button>'});
+    b.innerHTML='<input id="fq" type="search" placeholder="Search roti, dal, paneer, चाय..." autocomplete="off" aria-label="Search food">'+
+      (recent.length?'<div><p class="eyebrow" style="margin-bottom:6px">Recent</p><div class="seg" style="gap:6px">'+rc+'</div></div>':'')+
+      '<button type="button" class="btn ghost sm" data-act="customFood">+ Apna khana (custom)</button>'+
+      '<div id="fl"></div>';
+    renderFoodList('');
+    var q=$('#fq');q.addEventListener('input',function(){renderFoodList(q.value)});
+    setTimeout(function(){try{q.focus({preventScroll:true})}catch(e){}},60);
+  }else if(v==='detail'){
+    renderDetail();
+  }else if(v==='custom'){
+    t.textContent='Apna khana';
+    b.innerHTML='<label>Khane ka naam<input id="cuN" maxlength="40" placeholder="e.g. Ghar ka rajma chawal"></label>'+
+      '<div class="grid2"><label>Calories (kcal)<input id="cuK" type="number" min="0" max="3000" inputmode="decimal"></label><label>Protein (g)<input id="cuP" type="number" min="0" max="300" inputmode="decimal"></label>'+
+      '<label>Carbs (g)<input id="cuC" type="number" min="0" max="500" inputmode="decimal"></label><label>Fat (g)<input id="cuF" type="number" min="0" max="300" inputmode="decimal"></label></div>'+
+      '<label>Meal'+mealSelect('cuM',sel.meal)+'</label><p class="msg" id="cuMsg" role="alert"></p>'+
+      '<div class="grid2"><button type="button" class="btn ghost" data-act="shBack">Back</button><button type="button" class="btn" data-act="customAdd">Add</button></div>';
+  }
+}
+function mealSelect(id,val){
+  return '<select id="'+id+'">'+MEALS.map(function(m){return '<option value="'+m.id+'"'+(m.id===val?' selected':'')+'>'+m.label+'</option>'}).join('')+'</select>';
+}
+function renderFoodList(q){
+  q=q.trim().toLowerCase();var h='',n=0;
+  FOODS.forEach(function(f,i){
+    if(q&&f.n.toLowerCase().indexOf(q)<0&&f.h.indexOf(q)<0)return;
+    n++;
+    h+='<button type="button" class="frow" data-act="pickFood" data-i="'+i+'"><div class="n"><div>'+esc(f.n)+' <span class="muted">'+esc(f.h)+'</span></div><div class="s">'+baseText(f)+' &middot; '+f.k+' kcal</div></div><span class="chip">Add</span></button>';
+  });
+  $('#fl').innerHTML=n?h:'<p class="empty">Nahi mila. Upar se "Apna khana" me khud add karo.</p>';
+}
+function selUnits(){return unitsFor(sel.f)}
+function curUnit(){var u=selUnits().filter(function(x){return x.id===sel.uid})[0];return u||selUnits()[0]}
+function pickFood(f){
+  sel.f=f;var us=unitsFor(f);sel.uid=us[0].id;
+  sel.qty=+(f.g/us[0].g).toFixed(2);
+  sel.oil=2;
+  showSheet('detail');
+}
+function stepFor(u){return u.id==='g'?10:u.id==='tsp'||u.id==='tbsp'?0.5:0.5}
+function renderDetail(){
+  var f=sel.f,us=selUnits(),u=curUnit();
+  $('#shTitle').textContent=f.n;
+  var uh=us.map(function(x){return '<button type="button" data-act="setUnit" data-u="'+x.id+'" aria-pressed="'+(x.id===u.id)+'">'+x.label+'</button>'}).join('');
+  var oh='';
+  if(f.o>0){
+    oh='<div class="oil"><div class="row between"><span class="small muted">Tel / Ghee level</span><b id="oilLbl">'+OIL[sel.oil].label+'</b></div>'+
+       '<input id="oilR" type="range" min="0" max="3" step="1" value="'+sel.oil+'" aria-label="Oil or ghee level">'+
+       '<div class="lbs" id="oilLbs">'+OIL.map(function(o,i){return '<span'+(i===sel.oil?' class="on"':'')+'>'+o.label+'</span>'}).join('')+'</div></div>';
+  }
+  $('#shBody').innerHTML=
+    '<p class="muted small">'+esc(f.h)+' &middot; base: '+baseText(f)+'</p>'+
+    '<div><p class="small muted" style="margin-bottom:6px">Serving size</p><div class="seg" id="unitSeg">'+uh+'</div></div>'+
+    '<div><p class="small muted" style="margin-bottom:6px">Kitna? (<span id="uLbl">'+u.label+'</span>)</p><div class="stepper"><button type="button" class="ib" data-act="qtyDn" aria-label="Less">&minus;</button><input id="qty" type="number" min="0" step="any" inputmode="decimal" value="'+qtxt(sel.qty)+'" aria-label="Quantity"><button type="button" class="ib" data-act="qtyUp" aria-label="More">+</button></div></div>'+
+    oh+
+    '<div class="prev" id="prev"></div>'+
+    '<label>Meal'+mealSelect('dtM',sel.meal)+'</label>'+
+    '<p class="msg" id="dtMsg" role="alert"></p>'+
+    '<div class="grid2"><button type="button" class="btn ghost" data-act="shBack">Back</button><button type="button" class="btn" data-act="addEntry">Add to log</button></div>';
+  var qi=$('#qty');qi.addEventListener('input',function(){sel.qty=Math.max(0,parseFloat(qi.value)||0);updPrev()});
+  var rg=$('#oilR');if(rg)rg.addEventListener('input',function(){sel.oil=+rg.value;$('#oilLbl').textContent=OIL[sel.oil].label;$$('#oilLbs span').forEach(function(s,i){s.classList.toggle('on',i===sel.oil)});updPrev()});
+  $('#dtM').addEventListener('change',function(){sel.meal=$('#dtM').value});
+  updPrev();
+}
+function curEntry(){
+  var u=curUnit();
+  return calcEntry(sel.f,sel.qty*u.g,sel.oil);
+}
+function updPrev(){
+  var e=curEntry();
+  $('#prev').innerHTML='<div><b>'+r0(e.k)+'</b><span>kcal</span></div><div><b>'+r1(e.p)+'</b><span>protein g</span></div><div><b>'+r1(e.c)+'</b><span>carbs g</span></div><div><b>'+r1(e.f)+'</b><span>fat g</span></div>';
+}
+function setUnit(id){
+  var old=curUnit(),grams=sel.qty*old.g;
+  sel.uid=id;var nu=curUnit();
+  sel.qty=+(grams/nu.g).toFixed(2);
+  if(nu.id==='g')sel.qty=Math.round(sel.qty);
+  renderDetail();
+}
+function qtyStep(dir){
+  var u=curUnit(),st=stepFor(u);
+  var q=sel.qty+dir*st;
+  if(u.id!=='g'&&q<st)q=st;if(q<0)q=0;
+  sel.qty=+q.toFixed(2);
+  var qi=$('#qty');if(qi)qi.value=qtxt(sel.qty);
+  updPrev();
+}
+function addLogEntry(entry,dateKey){
+  var k=dateKey||logDate;
+  if(!logs[k])logs[k]=[];
+  logs[k].push(entry);
+  S.set('logs',logs);
+}
+function addEntryFromSheet(){
+  var u=curUnit();
+  if(!(sel.qty>0)){$('#dtMsg').textContent='Quantity 0 se zyada rakho.';return}
+  var e=curEntry(),f=sel.f;
+  var og=f.o>0&&sel.oil!==2?OIL[sel.oil].label:'';
+  addLogEntry({id:Date.now(),nm:f.n,meal:$('#dtM').value,qt:qtxt(sel.qty)+' '+(u.id==='g'?'g':u.label.toLowerCase()),og:og,k:e.k,p:e.p,c:e.c,f:e.f});
+  recent=[f.n].concat(recent.filter(function(n){return n!==f.n})).slice(0,8);S.set('recent',recent);
+  closeSheet();toast(f.n+' add ho gaya');renderAll();
+}
+function addCustom(){
+  var n=$('#cuN').value.trim(),k=parseFloat($('#cuK').value);
+  if(!n||!(k>=0)||isNaN(k)){$('#cuMsg').textContent='Naam aur calories daalo.';return}
+  addLogEntry({id:Date.now(),nm:n,meal:$('#cuM').value,qt:'1 serving',og:'',k:k,p:parseFloat($('#cuP').value)||0,c:parseFloat($('#cuC').value)||0,f:parseFloat($('#cuF').value)||0});
+  closeSheet();toast('Add ho gaya');renderAll();
+}
+
+/* ---------- WORKOUTS ---------- */
+function estKcal(w,minutes){return Math.round(w.met*(profile?profile.weight:60)*minutes/60)}
+function buildSteps(w){
+  var steps=[{type:'ready',name:'Get ready',tip:'Pehle exercise: '+w.ex[0][0],sec:5}];
+  for(var r=0;r<w.rounds;r++){
+    for(var i=0;i<w.ex.length;i++){
+      steps.push({type:'work',name:w.ex[i][0],tip:w.ex[i][1],sec:w.work,round:r+1});
+      var last=(r===w.rounds-1&&i===w.ex.length-1);
+      if(!last&&w.rest>0){
+        var nx=i<w.ex.length-1?w.ex[i+1][0]:w.ex[0][0];
+        steps.push({type:'rest',name:'Rest',tip:'Agla: '+nx,sec:w.rest});
+      }
     }
   }
-  recentList=out;
-  var box=$("#recentBox");box.hidden=!out.length;
-  box.innerHTML='<h2>'+t("recent")+'</h2><div style="display:flex;gap:8px;flex-wrap:wrap">'+out.map(function(o,i){return '<button type="button" class="btn ghost small" data-pickr="'+i+'">'+esc(o.name)+'</button>'}).join("")+'</div>';
+  return steps;
 }
-function renderRecipe(){
-  var sel=$("#rI"),cur=sel.value;
-  sel.innerHTML=FOODS.map(function(f,i){return '<option value="'+i+'">'+esc(nm(f))+'</option>'}).join("");
-  if(cur)sel.value=cur;
-  var h="",tk=0;
-  recipeIng.forEach(function(x,i){
-    var f=FOODS[x.i];tk+=f[2]*x.q;
-    h+='<div class="entry"><span class="nm">'+esc(nm(f))+' <span class="muted small">x'+x.q+'</span></span><span class="kc">'+r(f[2]*x.q)+'</span><button type="button" class="x" data-delr="'+i+'" aria-label="x">&times;</button></div>'});
-  $("#rList").innerHTML=h+(recipeIng.length?'<p class="small muted">'+r(tk)+' kcal</p>':"");
+function totalSec(w){return buildSteps(w).slice(1).reduce(function(a,s){return a+s.sec},0)}
+function renderWorkouts(){
+  var el=$('#s-workouts'),t=dkey();
+  var wm=dayWorkoutMin(t);
+  var week=0;for(var i=0;i<7;i++){week+=(wlogs[addDays(t,-i)]||[]).length}
+  var kc=(wlogs[t]||[]).reduce(function(a,w){return a+w.kcal},0);
+  var h='<div><p class="eyebrow">No equipment</p><h1>Desi Home Workouts</h1></div>'+
+   '<div class="card"><div class="kpis"><div class="kpi"><b>'+wm+'</b><span class="small muted">min aaj</span></div><div class="kpi"><b>'+kc+'</b><span class="small muted">kcal approx</span></div><div class="kpi"><b>'+week+'</b><span class="small muted">sessions, 7 din</span></div></div></div>';
+  WORKOUTS.forEach(function(w){
+    var mins=Math.round(totalSec(w)/60);
+    h+='<div class="card wk"><div class="row between"><div class="grow"><h2>'+esc(w.name)+' <span class="muted" style="font-weight:500">'+esc(w.hi)+'</span></h2><p class="small muted">'+esc(w.about)+'</p></div><button type="button" class="btn sm" data-act="startWk" data-id="'+w.id+'">Start</button></div>'+
+      '<div class="seg" style="gap:6px"><span class="chip">'+esc(w.lvl)+'</span><span class="chip">~'+mins+' min</span><span class="chip">'+w.work+'s kaam / '+w.rest+'s rest</span><span class="chip">'+w.rounds+' round</span><span class="chip">~'+estKcal(w,mins)+' kcal</span></div>'+
+      '<details><summary>Exercises ('+w.ex.length+')</summary><ol class="exl">'+w.ex.map(function(x){return '<li><b>'+esc(x[0])+'</b>: '+esc(x[1])+'</li>'}).join('')+'</ol></details></div>';
+  });
+  h+='<p class="small muted">Calorie burn andaza hai (MET se). Chot ya takleef ho to ruk jao. Koi bimari ho to doctor se pooch lo.</p>';
+  el.innerHTML=h;
 }
-function saveRecipe(){
-  var name=$("#rName").value.trim(),sv=Math.max(1,+$("#rServ").value||1);
-  if(!name||!recipeIng.length){toast(t("noIng"));return}
-  var k=0,p=0,c=0,f=0;
-  recipeIng.forEach(function(x){var z=FOODS[x.i];k+=z[2]*x.q;p+=z[3]*x.q;c+=z[4]*x.q;f+=z[5]*x.q});
-  myfoods.push({name:name,k:k/sv,p:p/sv,c:c/sv,f:f/sv});store.set("myfoods",myfoods);
-  recipeIng=[];$("#rName").value="";$("#rServ").value="1";renderRecipe();renderFood();toast(t("recipeSaved"));
+var run=null,tick=null,audio=null,wake=null;
+function beep(f,d){
+  try{
+    if(!audio)audio=new (window.AudioContext||window.webkitAudioContext)();
+    if(audio.state==='suspended')audio.resume();
+    var o=audio.createOscillator(),g=audio.createGain();
+    o.frequency.value=f;g.gain.value=0.08;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d);
+  }catch(e){}
 }
-function renderWeight(){
-  var el=$("#wChart"),n=weights.length;
-  if(!n){el.innerHTML='<p class="small muted">'+t("wempty")+'</p>';return}
-  var pts=weights.slice(-30),ws=pts.map(function(p){return p.w}),mn=Math.min.apply(null,ws),mx=Math.max.apply(null,ws);
-  if(mx-mn<1){mx+=0.5;mn-=0.5}
-  var W=300,H=110,pl=34,pr=8,pt=10,pb=18;
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
+function reqWake(){try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(function(l){wake=l}).catch(function(){})}catch(e){}}
+function relWake(){try{if(wake){wake.release();wake=null}}catch(e){}}
+function startWorkout(id){
+  var w=WORKOUTS.filter(function(x){return x.id===id})[0];if(!w)return;
+  var steps=buildSteps(w);
+  run={w:w,steps:steps,i:0,left:steps[0].sec*1000,end:0,paused:false,doneSec:0};
+  run.end=Date.now()+run.left;
+  $('#runner').classList.add('open');document.body.classList.add('lock');
+  ovOpen('runner',function(){stopRun(true)});
+  beep(880,0.15);reqWake();
+  drawRunner();
+  tick=setInterval(onTick,200);
+}
+function stopRun(silent){
+  clearInterval(tick);tick=null;relWake();
+  $('#runner').classList.remove('open');document.body.classList.remove('lock');
+  if(!silent&&ov&&ov.name==='runner')ovClose();
+  run=null;
+}
+function onTick(){
+  if(!run||run.paused)return;
+  var left=run.end-Date.now();
+  if(left<=0){nextStep();return}
+  run.left=left;
+  var s=Math.ceil(left/1000),b=$('#rtm');
+  if(b&&b.textContent!==String(s)){b.textContent=s;if(s<=3&&s>0)beep(660,0.08)}
+  var c=$('#rcirc');if(c){var tot=run.steps[run.i].sec*1000;c.style.strokeDashoffset=String((2*Math.PI*100)*(1-left/tot))}
+}
+function nextStep(){
+  if(!run)return;
+  var cur=run.steps[run.i];
+  if(cur.type!=='ready')run.doneSec+=cur.sec;
+  if(run.i>=run.steps.length-1){finishRun();return}
+  run.i++;var s=run.steps[run.i];
+  run.left=s.sec*1000;run.end=Date.now()+run.left;
+  beep(s.type==='work'?880:520,0.2);vib(s.type==='work'?[120,60,120]:200);
+  drawRunner();
+}
+function finishRun(){
+  var w=run.w,sec=run.doneSec+0,min=Math.max(1,Math.round(sec/60));
+  var kcal=estKcal(w,sec/60);
+  var k=dkey();if(!wlogs[k])wlogs[k]=[];wlogs[k].push({id:w.id,name:w.name,min:min,kcal:kcal});S.set('workouts',wlogs);
+  clearInterval(tick);tick=null;relWake();
+  beep(988,0.4);vib([200,80,200]);
+  var el=$('#runner');
+  el.innerHTML='<p class="ph work">Workout complete</p><h1>Shabaash'+(profile?', '+esc(profile.name):'')+'!</h1><p class="muted">'+esc(w.name)+'</p>'+
+    '<div class="card" style="min-width:min(300px,80vw)"><div class="kpis"><div class="kpi"><b>'+min+'</b><span class="small muted">min</span></div><div class="kpi"><b>~'+kcal+'</b><span class="small muted">kcal</span></div></div></div>'+
+    '<button type="button" class="btn" data-act="runDone">Done</button>';
+  run.finished=true;
+}
+function drawRunner(){
+  var s=run.steps[run.i],el=$('#runner'),circ=2*Math.PI*100;
+  var total=run.steps.length-1,pos=Math.max(0,run.i);
+  var cls=s.type;
+  el.innerHTML='<p class="ph '+cls+'">'+(s.type==='work'?'Kaam karo':s.type==='rest'?'Rest':'Ready')+(s.round&&run.w.rounds>1?' &middot; round '+s.round+'/'+run.w.rounds:'')+'</p>'+
+    '<div class="tm"><svg viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="100" fill="none" stroke="var(--track)" stroke-width="14"/><circle id="rcirc" cx="120" cy="120" r="100" fill="none" stroke="'+(s.type==='work'?'var(--accent)':s.type==='rest'?'var(--pro)':'var(--fat)')+'" stroke-width="14" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="0" transform="rotate(-90 120 120)"/></svg><b id="rtm" aria-live="off">'+Math.ceil(run.left/1000)+'</b></div>'+
+    '<div class="exn">'+esc(s.name)+'</div><p class="tp">'+esc(s.tip)+'</p>'+
+    '<div class="bar pbar"><i style="background:var(--accent);width:'+clamp(pos/total*100,0,100)+'%"></i></div><p class="small muted">Step '+pos+' / '+total+'</p>'+
+    '<div class="ctl"><button type="button" class="btn" data-act="runPause">'+(run.paused?'Resume':'Pause')+'</button><button type="button" class="btn ghost" data-act="runSkip">Skip</button><button type="button" class="btn ghost" data-act="runStop">Stop</button></div>';
+}
+function runPause(){
+  if(!run)return;
+  if(run.paused){run.paused=false;run.end=Date.now()+run.left}
+  else{run.paused=true;run.left=Math.max(0,run.end-Date.now())}
+  drawRunner();
+}
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden){
+    if(run&&!run.paused&&!run.finished)reqWake();
+    checkDay();
+  }
+});
+
+/* ---------- PROFILE ---------- */
+function renderProfile(){
+  var el=$('#s-profile');
+  if(!profile){el.innerHTML='';return}
+  var T=profile.t,b=bmiOf(profile),cat=bmiCat(b);
+  var pos=clamp((b-15)/(35-15),0,1)*100;
+  var dark=document.documentElement.getAttribute('data-theme')?document.documentElement.getAttribute('data-theme')==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var ft=Math.floor(profile.height/2.54/12),inch=Math.round(profile.height/2.54-ft*12);
+  if(inch===12){ft++;inch=0}
+  var hist=Object.keys(logs).filter(function(k){return logs[k].length}).sort().reverse().slice(0,10);
+  var hh='';
+  hist.forEach(function(k){var d=sumDay(k);hh+='<button type="button" class="hist" data-act="openDay" data-k="'+k+'"><span class="grow">'+esc(fmtDay(k))+'</span><span class="num">'+r0(d.k)+' kcal</span><span class="muted num small">'+r1(waterMl(k)/1000)+' L</span></button>'});
+  var wk=Object.keys(weights).sort();
+  var h=installHtml()+
+   '<div class="card"><div class="row"><div class="avatar">'+esc((profile.name||'F').charAt(0).toUpperCase())+'</div><div class="grow"><h1>'+esc(profile.name)+'</h1><p class="muted small">'+esc(GOAL_NAME[profile.goal])+'</p></div></div>'+
+   '<div class="stats"><div class="stat"><span class="small muted">Age</span><b>'+profile.age+' yrs</b></div><div class="stat"><span class="small muted">Gender</span><b>'+cap(profile.gender)+'</b></div><div class="stat"><span class="small muted">Height</span><b>'+r0(profile.height)+' cm</b><span class="small muted">'+ft+"'"+inch+'"</span></div><div class="stat"><span class="small muted">Weight</span><b>'+r1(profile.weight)+' kg</b></div></div></div>'+
+   '<div class="card"><h2>Daily targets</h2><div class="stats"><div class="stat"><span class="small muted">Calories</span><b>'+T.kcal+' kcal</b></div><div class="stat"><span class="small muted">Water</span><b>'+T.water+' L</b></div><div class="stat"><span class="small muted">Protein</span><b>'+T.protein+' g</b></div><div class="stat"><span class="small muted">Carbs / Fat</span><b>'+T.carbs+' / '+T.fat+' g</b></div></div></div>'+
+   '<div class="card"><div class="row between"><h2>BMI</h2><b class="num" style="font-size:1.5rem">'+r1(b)+'</b></div><div class="bmi" role="img" aria-label="BMI scale"><i style="left:'+pos+'%"></i></div>'+
+   '<div class="bmil"><span>15</span><span>18.5</span><span>23</span><span>25</span><span>30</span><span>35</span></div>'+
+   '<p><b style="color:'+cat.c+'">'+cat.t+'</b> <span class="muted">&middot; '+cat.h+'</span></p><p class="small muted">Indian (Asia-Pacific) BMI limits: Normal 18.5 se 22.9, Overweight 23 se 24.9, Obese 25+.</p></div>'+
+   '<div class="card"><h2>Weight log</h2><div class="row"><input id="wIn" type="number" min="30" max="250" step="0.1" inputmode="decimal" placeholder="Aaj ka weight (kg)" aria-label="Weight in kg"><button type="button" class="btn sm" data-act="logW">Save</button></div><div id="wChart"></div></div>'+
+   '<div class="card"><div class="row between"><div><h2>Dark mode</h2><p class="small muted">Raat ko aankhon ke liye aaram</p></div><button type="button" class="switch" role="switch" aria-checked="'+dark+'" aria-label="Dark mode" data-act="theme"></button></div></div>'+
+   '<div class="card"><h2>Goals</h2><button type="button" class="btn ghost" data-act="editGoals">Edit goals</button></div>'+
+   (hist.length?'<div class="card"><h2>Past days</h2>'+hh+'</div>':'')+
+   '<div class="card"><details><summary>Backup aur reset</summary><div style="display:flex;flex-direction:column;gap:10px;margin-top:10px"><p class="small muted">Export karke text sambhal ke rakho. Phone badle ya data mite to yahin paste karke Import karo.</p><textarea id="bk" aria-label="Backup text"></textarea><div class="grid2"><button type="button" class="btn ghost" data-act="bkExp">Export</button><button type="button" class="btn ghost" data-act="bkImp">Import</button></div><button type="button" class="btn danger" data-act="reset" id="rstBtn">Reset all data</button></div></details></div>'+
+   '<p class="small muted">FitBharat general jaankari deta hai, doctor ki salah nahi. Calorie values andaza hain. Aapka data sirf is phone me rehta hai. <a href="privacy.html" style="color:var(--acc-text)">Privacy policy</a></p>';
+  el.innerHTML=h;
+  drawWeight(wk);
+}
+function drawWeight(wk){
+  var el=$('#wChart');if(!el)return;
+  if(!wk.length){el.innerHTML='<p class="small muted">Weight log karo to graph dikhega.</p>';return}
+  var pts=wk.slice(-30).map(function(k){return {k:k,w:weights[k]}});
+  var ws=pts.map(function(p){return p.w}),mn=Math.min.apply(null,ws),mx=Math.max.apply(null,ws);
+  if(mx-mn<1){mx+=.5;mn-=.5}
+  var W=300,H=110,pl=34,pr=8,pt=10,pb=14;
   var xs=function(i){return pts.length===1?(pl+W-pr)/2:pl+i*(W-pl-pr)/(pts.length-1)};
   var ys=function(v){return pt+(mx-v)/(mx-mn)*(H-pt-pb)};
-  var line=pts.map(function(p,i){return xs(i).toFixed(1)+","+ys(p.w).toFixed(1)}).join(" ");
-  var last=pts[pts.length-1],ch=last.w-weights[0].w;
-  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+t("wtitle")+'">'+
+  var line=pts.map(function(p,i){return xs(i).toFixed(1)+','+ys(p.w).toFixed(1)}).join(' ');
+  var last=pts[pts.length-1],ch=last.w-weights[wk[0]];
+  el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Weight graph">'+
    '<line x1="'+pl+'" y1="'+ys(mx)+'" x2="'+(W-pr)+'" y2="'+ys(mx)+'" stroke="var(--line)"/><line x1="'+pl+'" y1="'+ys(mn)+'" x2="'+(W-pr)+'" y2="'+ys(mn)+'" stroke="var(--line)"/>'+
    '<text x="'+(pl-4)+'" y="'+(ys(mx)+4)+'" text-anchor="end" font-size="10" fill="var(--muted)">'+mx.toFixed(1)+'</text><text x="'+(pl-4)+'" y="'+(ys(mn)+4)+'" text-anchor="end" font-size="10" fill="var(--muted)">'+mn.toFixed(1)+'</text>'+
    (pts.length>1?'<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>':'')+
    '<circle cx="'+xs(pts.length-1)+'" cy="'+ys(last.w)+'" r="4.5" fill="var(--accent)"/></svg>'+
-   '<p class="small muted">'+last.w+' '+t("kg")+' &middot; '+t("wchange")+': '+(ch>0?"+":"")+ch.toFixed(1)+' '+t("kg")+'</p>';
+   '<p class="small muted num">'+r1(last.w)+' kg &middot; pehli entry se '+(ch>0?'+':'')+r1(ch)+' kg</p>';
 }
-function openPicker(){selQty=1;renderPicker.meal=defMeal();renderPicker();$("#picker").scrollIntoView({behavior:"smooth",block:"start"})}
-function initExtra(){
-  document.addEventListener("click",function(ev){
-    var b=ev.target.closest("button");if(!b)return;
-    if(b.dataset.pickm!=null){var m=myfoods[+b.dataset.pickm];selFood=null;selCustom={name:m.name,k:m.k,p:m.p,c:m.c,f:m.f};openPicker();return}
-    if(b.dataset.pickr!=null){selFood=null;selCustom=recentList[+b.dataset.pickr];openPicker();return}
-    if(b.dataset.delm!=null){myfoods.splice(+b.dataset.delm,1);store.set("myfoods",myfoods);renderFood();return}
-    if(b.dataset.delr!=null){recipeIng.splice(+b.dataset.delr,1);renderRecipe();return}
-    if(b.id==="rAdd"){recipeIng.push({i:+$("#rI").value,q:+$("#rQ").value||1});renderRecipe();return}
-    if(b.id==="rSave"){saveRecipe();return}
-    if(b.id==="bkExp"){
-      var s=JSON.stringify({v:1,logs:logs,water:water,done:done,wcount:store.get("wcount",0),profile:profile,myfoods:myfoods,weights:weights});
-      $("#bk").value=s;
-      try{$("#bk").select();navigator.clipboard.writeText(s).then(function(){toast(t("copied"))}).catch(function(){})}catch(e){}
-      return}
-    if(b.id==="bkImp"){
-      try{
-        var d=JSON.parse($("#bk").value);if(!d||typeof d!=="object"||d.v!==1)throw 0;
-        logs=d.logs||{};water=d.water||{};done=d.done||[];profile=d.profile||null;myfoods=d.myfoods||[];weights=d.weights||[];
-        store.set("logs",logs);store.set("water",water);store.set("done",done);store.set("profile",profile);store.set("myfoods",myfoods);store.set("weights",weights);store.set("wcount",+d.wcount||0);
-        loadProfile();renderAll();toast(t("imported"));
-      }catch(e){toast(t("badData"))}
-      return}
-  });
-  $("#wForm").addEventListener("submit",function(e){
-    e.preventDefault();var w=+$("#wIn").value;if(!w)return;
-    var k=dkey();weights=weights.filter(function(x){return x.d!==k});weights.push({d:k,w:w});
-    weights.sort(function(a,b){return a.d<b.d?-1:1});store.set("weights",weights);
-    $("#wIn").value="";renderWeight();toast(t("saved"));
-  });
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude/.test(location.hostname)){navigator.serviceWorker.register("sw.js").catch(function(){})}}catch(e){}
+function applyTheme(t){
+  var root=document.documentElement;
+  if(t==='dark'||t==='light')root.setAttribute('data-theme',t);else root.removeAttribute('data-theme');
+  var dark=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+  $('#metaTheme').setAttribute('content',dark?'#0E1411':'#FBF6EE');
 }
 
-/* ---------- Events ---------- */
-document.addEventListener("click",function(ev){
-  var b=ev.target.closest("button");if(!b)return;
-  if(b.dataset.tab){tab=b.dataset.tab;
-    document.querySelectorAll(".tab").forEach(function(s){s.classList.toggle("on",s.id==="tab-"+tab)});
-    document.querySelectorAll("nav button").forEach(function(n){n.setAttribute("aria-selected",String(n===b))});
-    window.scrollTo(0,0);return}
-  if(b.id==="langBtn"){lang=lang==="hi"?"en":"hi";store.set("lang",lang);applyLang();return}
-  if(b.dataset.g!=null){var k=dkey(),i=+b.dataset.g,cur=water[k]||0;water[k]=(cur===i+1)?i:i+1;store.set("water",water);renderToday();return}
-  if(b.dataset.del!=null){var kk=dkey();logs[kk].splice(+b.dataset.del,1);store.set("logs",logs);renderToday();toast(t("removed"));return}
-  if(b.dataset.pick!=null){selFood=+b.dataset.pick;selCustom=null;selQty=1;renderPicker.meal=defMeal();renderPicker();$("#picker").scrollIntoView({behavior:"smooth",block:"start"});return}
-  if(b.id==="qm"){selQty=Math.max(0.5,selQty-0.5);renderPicker.meal=$("#pm").value;renderPicker();return}
-  if(b.id==="qp"){selQty=Math.min(10,selQty+0.5);renderPicker.meal=$("#pm").value;renderPicker();return}
-  if(b.id==="pNo"){selFood=null;selCustom=null;renderPicker();return}
-  if(b.id==="pOk"){var f=selCustom?[selCustom.name,selCustom.name,selCustom.k,selCustom.p,selCustom.c,selCustom.f]:FOODS[selFood];
-    addEntry({fid:selCustom?null:selFood,name:selCustom?selCustom.name:undefined,q:selQty,m:$("#pm").value,k:f[2]*selQty,p:f[3]*selQty,c:f[4]*selQty,f:f[5]*selQty});
-    selFood=null;selCustom=null;renderPicker();renderToday();renderFood();toast(t("added"));return}
-  if(b.dataset.start){startPlan(b.dataset.start);return}
-  if(b.id==="rPause"){run.paused=!run.paused;renderRunner();return}
-  if(b.id==="rSkip"){if(run.phase==="work"&&run.i>=run.plan.ex.length-1){finish()}else{advance()}return}
-  if(b.id==="rStop"){stopRun();return}
-});
-$("#q").addEventListener("input",renderFood);
-$("#customForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  var n=$("#cName").value.trim();if(!n)return;
-  addEntry({fid:null,name:n,q:1,m:$("#cM").value,k:+$("#cK").value||0,p:+$("#cP").value||0,c:+$("#cC").value||0,f:+$("#cF").value||0});
-  e.target.reset();$("#cM").value=defMeal();renderToday();toast(t("added"));
-});
-$("#profForm").addEventListener("submit",function(e){
-  e.preventDefault();
-  var age=+$("#pAge").value,h=+$("#pH").value,w=+$("#pW").value,sex=$("#pSex").value,act=$("#pAct").value,goal=$("#pGoal").value;
-  var bmr=10*w+6.25*h-5*age+(sex==="m"?5:-161);
-  var tdee=bmr*parseFloat(act),adj=goal==="lose"?-400:goal==="gain"?300:0;
-  profile={age:age,h:h,w:w,sex:sex,act:act,goal:goal,target:Math.max(1200,r(tdee+adj)),prot:r(w*1.4),glasses:Math.max(6,Math.ceil(w*35/250))};
-  store.set("profile",profile);showResult();renderToday();toast(t("saved"));
+/* ---------- ONBOARDING ---------- */
+var ob={step:1,data:{},edit:false};
+function obOpen(edit){
+  ob={step:1,data:{},edit:!!edit};
+  var p=profile;
+  $('#obName').value=edit&&p?p.name:'';
+  $('#obAge').value=edit&&p?p.age:'';
+  $('#obH').value=edit&&p?r1(p.height):'';
+  $('#obFt').value='';$('#obIn').value='';
+  $('#obW').value=edit&&p?r1(p.weight):'';
+  ob.data.gender=edit&&p?p.gender:'';
+  ob.data.hu='cm';
+  ob.data.act=edit&&p?p.activity:'';
+  ob.data.goal=edit&&p?p.goal:'';
+  $('#obTitle1').textContent=edit?'Details badlo':'Namaste! Aap kaun ho?';
+  $('#obFinish').textContent=edit?'Save changes':'Start FitBharat';
+  $('#obCancel').hidden=!edit;
+  obSyncSel();
+  obShow(1);
+  $('#onb').classList.add('open');document.body.classList.add('lock');
+  if(edit)ovOpen('onb',function(){$('#onb').classList.remove('open');document.body.classList.remove('lock')});
+}
+function obCloseNow(){$('#onb').classList.remove('open');document.body.classList.remove('lock')}
+function obShow(n){
+  ob.step=n;
+  [1,2,3].forEach(function(i){$('#ob'+i).classList.toggle('on',i===n)});
+  $$('#obDots i').forEach(function(d,i){d.classList.toggle('on',i<n)});
+  $('#onb').scrollTop=0;
+}
+function obSyncSel(){
+  $$('#obGender button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===ob.data.gender))});
+  $$('#obHU button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===ob.data.hu))});
+  $('#obHcm').hidden=ob.data.hu!=='cm';$('#obHft').hidden=ob.data.hu!=='ft';
+  $('#obAct').innerHTML=ACT.map(function(a){return '<button type="button" class="opt" data-act="obAct" data-v="'+a.v+'" aria-pressed="'+(a.v===ob.data.act)+'"><b>'+a.t+'</b><span>'+a.d+'</span></button>'}).join('');
+  $('#obGoal').innerHTML=GOALS.map(function(g){return '<button type="button" class="opt" data-act="obGoal" data-v="'+g.v+'" aria-pressed="'+(g.v===ob.data.goal)+'"><b>'+g.t+'</b><span>'+g.d+'</span></button>'}).join('');
+}
+function heightCm(){
+  if(ob.data.hu==='ft'){
+    var f=parseFloat($('#obFt').value),i=parseFloat($('#obIn').value)||0;
+    if(isNaN(f))return NaN;
+    return (f*12+i)*2.54;
+  }
+  return parseFloat($('#obH').value);
+}
+function obNext(){
+  if(ob.step===1){
+    var n=$('#obName').value.trim(),a=parseInt($('#obAge').value,10);
+    var m=$('#obMsg1');
+    if(!n){m.textContent='Apna naam likho.';return}
+    if(!(a>=14&&a<=90)){m.textContent='Age 14 se 90 ke beech daalo.';return}
+    if(!ob.data.gender){m.textContent='Gender chuno.';return}
+    m.textContent='';obShow(2);
+  }else if(ob.step===2){
+    var h=heightCm(),w=parseFloat($('#obW').value),m2=$('#obMsg2');
+    if(!(h>=120&&h<=220)){m2.textContent='Height 120 se 220 cm (ya 4 ft se 7 ft) ke beech daalo.';return}
+    if(!(w>=30&&w<=250)){m2.textContent='Weight 30 se 250 kg ke beech daalo.';return}
+    m2.textContent='';obShow(3);
+  }
+}
+function obFinish(){
+  var m=$('#obMsg3');
+  if(!ob.data.act){m.textContent='Activity level chuno.';return}
+  if(!ob.data.goal){m.textContent='Goal chuno.';return}
+  var p={
+    name:$('#obName').value.trim(),age:parseInt($('#obAge').value,10),gender:ob.data.gender,
+    height:Math.round(heightCm()*10)/10,weight:Math.round(parseFloat($('#obW').value)*10)/10,
+    activity:ob.data.act,goal:ob.data.goal,created:profile&&profile.created?profile.created:dkey()
+  };
+  p.t=calcTargets(p);
+  profile=p;S.set('profile',profile);
+  weights[dkey()]=p.weight;S.set('weights',weights);
+  m.textContent='';
+  var wasEdit=ob.edit;
+  if(wasEdit){ovClose()}else{obCloseNow()}
+  toast(wasEdit?'Targets update ho gaye':'Taiyaar! Aapke targets set ho gaye');
+  setTab(wasEdit?'profile':'home');
+}
+
+/* ---------- misc actions ---------- */
+function logWeight(){
+  var v=parseFloat($('#wIn').value);
+  if(!(v>=30&&v<=250)){toast('Weight 30 se 250 kg ke beech daalo');return}
+  weights[dkey()]=Math.round(v*10)/10;S.set('weights',weights);
+  profile.weight=Math.round(v*10)/10;profile.t=calcTargets(profile);S.set('profile',profile);
+  toast('Weight save, targets update');renderProfile();
+}
+function exportData(){
+  var o={v:2,t:Date.now()};
+  ['profile','logs','water','workouts','weights','recent','theme'].forEach(function(k){o[k]=S.get(k,null)});
+  var s=JSON.stringify(o);$('#bk').value=s;
+  try{$('#bk').select();navigator.clipboard.writeText(s).then(function(){toast('Copy ho gaya')}).catch(function(){toast('Text select ho gaya, copy kar lo')})}catch(e){}
+}
+function importData(){
+  try{
+    var o=JSON.parse($('#bk').value);
+    if(!o||o.v!==2||!o.profile)throw 0;
+    ['profile','logs','water','workouts','weights','recent','theme'].forEach(function(k){if(o[k]!=null)S.set(k,o[k])});
+    profile=S.get('profile',null);logs=S.get('logs',{});water=S.get('water',{});wlogs=S.get('workouts',{});weights=S.get('weights',{});recent=S.get('recent',[]);
+    applyTheme(S.get('theme',null));toast('Data wapas aa gaya');renderAll();
+  }catch(e){toast('Ye sahi backup text nahi hai')}
+}
+var rstArmed=false,rstT=null;
+function resetAll(){
+  var b=$('#rstBtn');
+  if(!rstArmed){rstArmed=true;b.textContent='Pakka? Dobara dabao';clearTimeout(rstT);rstT=setTimeout(function(){rstArmed=false;if(b)b.textContent='Reset all data'},4000);return}
+  try{Object.keys(localStorage).forEach(function(k){if(k.indexOf('fb2_')===0)localStorage.removeItem(k)})}catch(e){}
+  mem={};location.reload();
+}
+function checkDay(){
+  var n=dkey();
+  if(n!==today){
+    var wasToday=(logDate===today);
+    today=n;if(wasToday)logDate=today;
+    if(profile)renderAll();
+  }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest('[data-act]');if(!el)return;
+  var a=el.dataset.act;
+  switch(a){
+    case 'tab':setTab(el.dataset.tab);break;
+    case 'goLog':logDate=today;setTab('log');break;
+    case 'water':
+      var d=+el.dataset.d;water[today]=Math.max(0,waterMl(today)+d);S.set('water',water);
+      if(d>0)toast('+250 ml');renderHome();break;
+    case 'dayPrev':logDate=addDays(logDate,-1);renderLog();break;
+    case 'dayNext':if(logDate<today){logDate=addDays(logDate,1);renderLog()}break;
+    case 'delEntry':
+      var arr=logs[logDate]||[];arr.splice(+el.dataset.i,1);if(!arr.length)delete logs[logDate];S.set('logs',logs);toast('Hata diya');renderLog();break;
+    case 'addFood':openSheet(el.dataset.meal);break;
+    case 'sheetClose':closeSheet();break;
+    case 'pickFood':pickFood(FOODS[+el.dataset.i]);break;
+    case 'pickRecent':
+      var f=FOODS.filter(function(x){return x.n===el.dataset.n})[0];if(f)pickFood(f);break;
+    case 'customFood':showSheet('custom');break;
+    case 'customAdd':addCustom();break;
+    case 'shBack':showSheet('search');break;
+    case 'setUnit':setUnit(el.dataset.u);break;
+    case 'qtyUp':qtyStep(1);break;
+    case 'qtyDn':qtyStep(-1);break;
+    case 'addEntry':addEntryFromSheet();break;
+    case 'startWk':startWorkout(el.dataset.id);break;
+    case 'runPause':runPause();break;
+    case 'runSkip':nextStep();break;
+    case 'runStop':ovClose();break;
+    case 'runDone':ovClose();setTab('workouts');break;
+    case 'install':doInstall();break;
+    case 'installHide':S.set('installHide',Date.now()+7*864e5);renderAll();break;
+    case 'theme':
+      var cur=document.documentElement.getAttribute('data-theme');
+      var isDark=cur?cur==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var nt=isDark?'light':'dark';S.set('theme',nt);applyTheme(nt);renderProfile();break;
+    case 'editGoals':obOpen(true);break;
+    case 'logW':logWeight();break;
+    case 'openDay':logDate=el.dataset.k;setTab('log');break;
+    case 'bkExp':exportData();break;
+    case 'bkImp':importData();break;
+    case 'reset':resetAll();break;
+    case 'obGender':ob.data.gender=el.dataset.v;obSyncSel();break;
+    case 'obHU':
+      if(ob.data.hu!==el.dataset.v){
+        var h=heightCm();
+        ob.data.hu=el.dataset.v;
+        if(!isNaN(h)&&h>0){
+          if(ob.data.hu==='ft'){var tin=h/2.54;$('#obFt').value=Math.floor(tin/12);$('#obIn').value=Math.round(tin%12)}
+          else $('#obH').value=r1(h);
+        }
+        obSyncSel();
+      }break;
+    case 'obAct':ob.data.act=parseFloat(el.dataset.v);obSyncSel();break;
+    case 'obGoal':ob.data.goal=el.dataset.v;obSyncSel();break;
+    case 'obNext':obNext();break;
+    case 'obBack':obShow(Math.max(1,ob.step-1));break;
+    case 'obFinish':obFinish();break;
+    case 'obCancel':ovClose();break;
+  }
 });
 
-applyLang();loadProfile();initExtra();
+/* ---------- boot ---------- */
+function afterSplash(){
+  var sp=$('#splash');sp.classList.add('hide');
+  setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp)},600);
+  if(!profile){obOpen(false)}
+  else{
+    var q=(location.search.match(/[?&]tab=([a-z]+)/)||[])[1];
+    setTab(q||'home');
+  }
+}
+applyTheme(S.get('theme',null));
+setInterval(checkDay,30000);
+window.addEventListener('load',function(){
+  if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+});
+setTimeout(afterSplash,2000);
+
+/* test hook (harmless in production) */
+window.__fb={calc:calcTargets,bmi:bmiOf,entry:calcEntry,foods:FOODS};
 })();
 </script>
 </body>

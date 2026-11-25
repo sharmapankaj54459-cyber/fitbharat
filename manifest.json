@@ -1,19 +1,25 @@
 {
+  "id": "./",
   "name": "FitBharat",
   "short_name": "FitBharat",
-  "description": "Indian food calorie tracker and home workouts in Hindi and English.",
-  "lang": "hi",
-  "start_url": "./",
+  "description": "Indian food calorie tracker, desi home workouts and water log. Har Ghar Fit India.",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0F1814",
-  "theme_color": "#1B7F52",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0E1411",
+  "theme_color": "#0E1411",
   "categories": ["health", "fitness", "lifestyle"],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Log Food", "short_name": "Log Food", "url": "./?tab=log", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Workouts", "short_name": "Workouts", "url": "./?tab=workouts", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
