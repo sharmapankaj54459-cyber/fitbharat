@@ -1,6 +1,6 @@
 /* FitBharat service worker: works offline after the first visit.
    Change CACHE_VERSION whenever you upload a new index.html so phones pick up the update. */
-var CACHE_VERSION = "fitbharat-v2-1";
+var CACHE_VERSION = "fitbharat-v3-1";
 var SHELL = [
   "./",
   "index.html",
